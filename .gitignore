@@ -28,5 +28,9 @@
 *.out
 *.app
 
-lib/*
-*/Debug/*
+Debug/*
+Release/*
+test/*/Debug/*
+test/*/Release/*
+vcproj/Debug/*
+vcproj/Release/*

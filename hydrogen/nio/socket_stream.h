@@ -4,12 +4,6 @@
 #include <hydrogen/nio/iosocket.h>
 
 namespace nio{
-    class socket_stream_exception : public std::exception {
-    public:
-        socket_stream_exception() {}
-        socket_stream_exception(const char* msg) : std::exception(msg) {}
-    };
-
     /* socket_stream encapsulates iosocket and provides std::iostream-like methods
      * to do synchronized(and blocked) IO.
      */
@@ -34,7 +28,7 @@ namespace nio{
         void open(const char* uname);
 
         void close(){ _sock.close(); }
-        bool is_open() { return !_sock.is_bad(); }
+        bool is_open() { return !_sock.bad(); }
         void read(char* buf, size_t bytes);
         void read_some(char* buf, size_t bytes);
         void write(const char* buf, size_t bytes);

@@ -15,6 +15,9 @@ endpoint::endpoint(const char* host, int port){
         _addr.sin_addr.S_un.S_addr = *reinterpret_cast<u_long*>(ent->h_addr_list[0]);
         _addr.sin_port = ::htons(port);
     }
+    else {
+        throw socket_exception(hy::strcat("Host resolve failed: ", host));
+    }
 }
 
 endpoint endpoint::from_uname(const char* uname){

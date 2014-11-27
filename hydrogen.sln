@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nio", "vcproj\nio.vcxproj", "{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pingpong", "test\pingpong\pingpong.vcxproj", "{1C84960C-C82F-49C0-814D-7D142EBD7423}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E} = {BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

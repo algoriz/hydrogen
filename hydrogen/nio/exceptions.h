@@ -9,9 +9,20 @@ namespace nio {
         exception(const std::string& msg) : exception(msg.c_str()){}
     };
 
-    class host_not_found : public exception {
+    class socket_exception : public exception {
     public:
-        host_not_found(): exception("Host not found."){}
-        host_not_found(const char* host) : exception(hy::makestr()){}
+        explicit socket_exception(int error = 0)
+            : _error(error) {}
+
+        socket_exception(const char* msg, int error = 0)
+            : exception(msg), _error(error){}
+
+        socket_exception(const std::string& msg, int error = 0)
+            : exception(msg.c_str()), _error(error) {}
+
+        int error_code() const { return _error; }
+
+    private:
+        int _error;
     };
 }

@@ -8,51 +8,31 @@ socket_stream::socket_stream(){}
 socket_stream::socket_stream(iosocket&& sock) : _sock(std::move(sock)){}
 
 void socket_stream::attach(iosocket&& sock){
-    if (!_sock.is_bad()) {
-        throw socket_stream_exception("can't attach socket to a open stream");
+    if (!_sock.bad()) {
+        throw socket_exception("can't attach socket to a open stream");
     }
     sock.swap(_sock);
 }
 
-void socket_stream::read(char* buf, size_t bytes){
-    try{
-        local_read(buf, bytes);
-        if (bytes){
-            _sock.read(buf, bytes);
-        }
-    }
-    catch (socket_exception e){
-        throw socket_stream_exception(e.what());
+void socket_stream::read(char* buf, size_t bytes) {
+    local_read(buf, bytes);
+    if (bytes) {
+        _sock.read(buf, bytes);
     }
 }
 
-void socket_stream::read_some(char* buf, size_t bytes){
-    try{
-        if (!local_read(buf, bytes) && bytes){
-            _sock.read_some(buf, bytes);
-        }
-    }
-    catch (socket_exception e){
-        throw socket_stream_exception(e.what());
+void socket_stream::read_some(char* buf, size_t bytes) {
+    if (!local_read(buf, bytes) && bytes) {
+        _sock.read_some(buf, bytes);
     }
 }
 
-void socket_stream::write(const char* buf, size_t bytes){
-    try{
-        _sock.write(buf, bytes);
-    }
-    catch (std::exception e){
-        throw socket_stream_exception(e.what());
-    }
+void socket_stream::write(const char* buf, size_t bytes) {
+    _sock.write(buf, bytes);
 }
 
-void socket_stream::write_some(const char* buf, size_t bytes){
-    try{
-        _sock.write_some(buf, bytes);
-    }
-    catch (std::exception e){
-        throw socket_stream_exception(e.what());
-    }
+void socket_stream::write_some(const char* buf, size_t bytes) {
+    _sock.write_some(buf, bytes);
 }
 
 size_t socket_stream::local_read(char*& buf, size_t& count){
@@ -69,17 +49,14 @@ size_t socket_stream::local_read(char*& buf, size_t& count){
 }
 
 void socket_stream::open(const endpoint& ep){
-    int fd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (fd == -1){
-        throw socket_stream_exception("failed to create socket.");
-    }
+    tcp_socket s(true);
 
     auto addr = ep.getaddr();
-    if (::connect(fd, (sockaddr*)&addr, sizeof(addr))){
-        throw socket_stream_exception("could not connect.");
+    if (::connect(s.native_handle(), (sockaddr*)&addr, sizeof(addr))){
+        throw socket_exception("could not connect.");
     }
 
-    _sock.swap(iosocket(fd));
+    _sock.swap(iosocket(std::move(s)));
 }
 
 void socket_stream::open(const char* uname){
@@ -110,14 +87,8 @@ void socket_stream::getline(char* dst, size_t count, char delim){
     /* All bytes in the buffer have been copied to dst, then we should read 
      * data from the socket.
      */
-    int rd = 0;
-    try{
-        rd = _sock.read_some(dst, count);
-    }
-    catch (socket_exception e){
-        throw socket_stream_exception(e.what());
-    }
-    
+    int rd = _sock.read_some(dst, count);
+
     char* p = dst;
     char* pend = dst + rd;
     for (; !delimed && p < pend; ++p){

@@ -20,13 +20,13 @@
     <ClInclude Include="..\hydrogen\nio\iosocket.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\hydrogen\nio\socket_acceptor.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\hydrogen\nio\socket_stream.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\hydrogen\nio\nio.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hydrogen\nio\socket_acceptor.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,6 +38,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\hydrogen\nio\socket_stream.cc">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hydrogen\nio\socket_acceptor.cc">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
