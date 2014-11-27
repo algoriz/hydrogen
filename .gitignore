@@ -7,6 +7,7 @@
 # Precompiled Headers
 *.gch
 *.pch
+*.suo
 
 # Compiled Dynamic libraries
 *.so
@@ -26,3 +27,6 @@
 *.exe
 *.out
 *.app
+
+lib/*
+*/Debug/*

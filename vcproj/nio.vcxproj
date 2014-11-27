@@ -11,13 +11,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="iosocket.h" />
-    <ClInclude Include="socket_stream.h" />
+    <ClInclude Include="..\hydrogen\nio\exceptions.h" />
+    <ClInclude Include="..\hydrogen\nio\inet_proto.h" />
+    <ClInclude Include="..\hydrogen\nio\iosocket.h" />
+    <ClInclude Include="..\hydrogen\nio\nio.h" />
+    <ClInclude Include="..\hydrogen\nio\socket_acceptor.h" />
+    <ClInclude Include="..\hydrogen\nio\socket_stream.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\hydrogen\nio\inet_proto.cc" />
+    <ClCompile Include="..\hydrogen\nio\iosocket.cc" />
+    <ClCompile Include="..\hydrogen\nio\socket_stream.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DEC0724C-9914-4DA5-8E98-823E188DFA67}</ProjectGuid>
+    <ProjectGuid>{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libsocket</RootNamespace>
+    <RootNamespace>nio</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -43,7 +52,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)lib\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)lib\$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -51,6 +65,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -66,6 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
