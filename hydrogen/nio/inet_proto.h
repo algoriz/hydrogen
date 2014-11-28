@@ -35,7 +35,7 @@ namespace nio{
 
         /* endpoint bind to 127.0.0.1 */
         static endpoint localhost(int port){
-            return endpoint("127.0.0.1", port);
+            return endpoint("localhost", port);
         }
 
         /* endpoint bind to 0.0.0.0 */

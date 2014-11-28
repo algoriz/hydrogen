@@ -23,6 +23,7 @@
     <ClCompile Include="..\hydrogen\nio\iosocket.cc" />
     <ClCompile Include="..\hydrogen\nio\socket_acceptor.cc" />
     <ClCompile Include="..\hydrogen\nio\socket_stream.cc" />
+    <ClCompile Include="exceptions.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}</ProjectGuid>

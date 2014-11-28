@@ -10,6 +10,9 @@ using namespace nio;
 int main(){
     auto ep = endpoint::localhost(7070);
 
+    WSADATA d = { 0 };
+    ::WSAStartup(MAKEWORD(2, 2), &d);
+
     auto f1 = [&ep]()->void {
         try {
             socket_stream stream;
@@ -58,5 +61,7 @@ int main(){
     
     th1.join();
     th2.join();
+
+    ::WSACleanup();
     return 0;
 }
