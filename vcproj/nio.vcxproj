@@ -12,15 +12,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\hydrogen\nio\exceptions.h" />
-    <ClInclude Include="..\hydrogen\nio\inet_proto.h" />
-    <ClInclude Include="..\hydrogen\nio\iosocket.h" />
+    <ClInclude Include="..\hydrogen\nio\protocols.h" />
+    <ClInclude Include="..\hydrogen\nio\stream_socket.h" />
     <ClInclude Include="..\hydrogen\nio\nio.h" />
     <ClInclude Include="..\hydrogen\nio\socket_acceptor.h" />
     <ClInclude Include="..\hydrogen\nio\socket_stream.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\hydrogen\nio\inet_proto.cc" />
-    <ClCompile Include="..\hydrogen\nio\iosocket.cc" />
+    <ClCompile Include="..\hydrogen\nio\protocols.cc" />
+    <ClCompile Include="..\hydrogen\nio\stream_socket.cc" />
     <ClCompile Include="..\hydrogen\nio\socket_acceptor.cc" />
     <ClCompile Include="..\hydrogen\nio\socket_stream.cc" />
     <ClCompile Include="exceptions.cc" />

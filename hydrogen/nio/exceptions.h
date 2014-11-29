@@ -1,8 +1,10 @@
 #pragma once
 #include <stdexcept>
+#include <thread>
 #include <hydrogen/varadic.h>
 
 namespace nio {
+    /* Network IO specific error codes */
     class error_code {
     public:
         static const int success = 0;
@@ -13,15 +15,18 @@ namespace nio {
         static const int out_of_memory = ENOMEM;
         static const int operation_no_supported = EOPNOTSUPP;
 
-        /* Get last error */
-        static int last_error();
     };
-    
+
+    /* Get last error */
+    int last_error();
+
     struct exception {
         exception()
             : _what("unknown nio::exception"), _error(error_code::success){}
         exception(int error)
             : _error(error){}
+        exception(const char* msg, int error = error_code::success)
+            : exception(std::string(msg), error){}
         exception(std::string&& msg, int error = error_code::success)
             : _error(error), _what(std::move(msg)){}
 
@@ -35,5 +40,11 @@ namespace nio {
 
     class socket_exception : public exception {
     public:
+        socket_exception()
+            : exception("unknown nio::socket_exception"){}
+        socket_exception(const char* msg, int error = error_code::success)
+            : exception(std::string(msg), error){}
+        socket_exception(std::string&& msg, int error = error_code::success)
+            : exception(std::move(msg), error){}
     };
 }

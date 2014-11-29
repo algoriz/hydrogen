@@ -1,5 +1,5 @@
 #pragma once
-#include <hydrogen/nio/iosocket.h>
+#include <hydrogen/nio/stream_socket.h>
 
 namespace nio {
     class socket_acceptor : public tcp_socket {
@@ -10,7 +10,7 @@ namespace nio {
         void bind(const endpoint& ep);
         void listen(int backlog = 5);
         void listen(const endpoint& ep, int backlog = 5);
-        iosocket&& accept();
+        stream_socket&& accept();
 
         endpoint getname() const { return _name; }
 

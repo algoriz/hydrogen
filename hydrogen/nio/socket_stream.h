@@ -1,28 +1,28 @@
 #pragma once
 #include <string>
-#include <hydrogen/nio/inet_proto.h>
-#include <hydrogen/nio/iosocket.h>
+#include <hydrogen/nio/protocols.h>
+#include <hydrogen/nio/stream_socket.h>
 
 namespace nio{
-    /* socket_stream encapsulates iosocket and provides std::iostream-like methods
-     * to do synchronized(and blocked) IO.
+    /* socket_stream encapsulates stream_socket and provides std::iostream-like
+     * methods to do synchronized(and blocked) IO.
      */
     class socket_stream {
     public:
         /* Constructs an empty socket_stream. */
         socket_stream();
 
-        /* Constructs from an iosocket object.
+        /* Constructs from an stream_socket object.
          * The constructed socket_stream object will take the ownership of the
-         * iosocket object.
+         * stream_socket object.
          */
-        socket_stream(iosocket&& sock);
+        socket_stream(stream_socket&& sock);
 
-        /* Attaches a new iosocket to current socket_stream.
+        /* Attaches a new stream_socket to current socket_stream.
          * Note that current socket_stream must be empty or closed before attaching
-         * the new iosocket, or this method throws a socket_stream_exception.
+         * the new stream_socket, or this method throws a socket_stream_exception.
          */
-        void attach(iosocket&& sock);
+        void attach(stream_socket&& sock);
 
         void open(const endpoint& ep);
         void open(const char* uname);
@@ -45,8 +45,8 @@ namespace nio{
         size_t local_read(char*& buf, size_t& bytes);
 
     private:
-        /* Underlying socket */
-        iosocket _sock;
+        /* The underlying socket */
+        stream_socket _sock;
 
         /* Buffer for read parsing */
         std::string _buf;

@@ -14,12 +14,6 @@
     <ClInclude Include="..\hydrogen\nio\exceptions.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\hydrogen\nio\inet_proto.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hydrogen\nio\iosocket.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\hydrogen\nio\socket_stream.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -29,14 +23,14 @@
     <ClInclude Include="..\hydrogen\nio\socket_acceptor.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\hydrogen\nio\stream_socket.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hydrogen\nio\protocols.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\hydrogen\nio\inet_proto.cc">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hydrogen\nio\iosocket.cc">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="..\hydrogen\nio\socket_stream.cc">
       <Filter>source</Filter>
     </ClCompile>
@@ -44,6 +38,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="exceptions.cc">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hydrogen\nio\stream_socket.cc">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hydrogen\nio\protocols.cc">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

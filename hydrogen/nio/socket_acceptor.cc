@@ -12,26 +12,19 @@ socket_acceptor::socket_acceptor(const endpoint& ep)
 }
 
 void socket_acceptor::bind(const endpoint& ep) {
-    if (bad()) {
-        throw socket_exception("bad socket");
-    }
-
     auto addr = ep.getaddr();
     if (::bind(native_handle(), (sockaddr*)&addr, sizeof(addr))) {
-        throw socket_exception(hy::strcat("socket bind failed: ", ep.to_uname()));
+        throw socket_exception(hy::strcat("socket bind failed: ", ep.to_uname()), last_error());
     }
     _name = ep;
 }
 
-iosocket&& socket_acceptor::accept() {
-    sockaddr_in addr;
-    int len = sizeof(addr);
-    int fd = ::accept(native_handle(), reinterpret_cast<sockaddr*>(&addr), &len);
-    tcp_socket s(fd);
-    if (s.bad()) {
-        throw socket_exception("socket accept failed.");
+void socket_acceptor::listen(const endpoint& ep, int backlog) {
+    if (bad()){
+        tcp_socket::swap(tcp_socket::new_socket());
     }
-    return std::move(iosocket(std::move(s)));
+    bind(ep);
+    listen(backlog);
 }
 
 void socket_acceptor::listen(int backlog) {
@@ -40,11 +33,17 @@ void socket_acceptor::listen(int backlog) {
     }
 
     if (::listen(native_handle(), backlog)) {
-        throw socket_exception(hy::strcat("socket listen failed: ", _name.to_uname()));
+        throw socket_exception(hy::strcat("socket listen failed: ", _name.to_uname()), last_error());
     }
 }
 
-void socket_acceptor::listen(const endpoint& ep, int backlog) {
-    bind(ep);
-    listen(backlog);
+stream_socket&& socket_acceptor::accept() {
+    sockaddr_in addr;
+    int len = sizeof(addr);
+    int fd = ::accept(native_handle(), reinterpret_cast<sockaddr*>(&addr), &len);
+    tcp_socket s(fd);
+    if (s.bad()) {
+        throw socket_exception("socket accept failed.");
+    }
+    return std::move(stream_socket(std::move(s)));
 }

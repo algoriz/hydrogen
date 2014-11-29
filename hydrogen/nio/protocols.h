@@ -75,34 +75,42 @@ namespace nio{
     class socket_base {
     public:
         typedef proto_traits proto;
-        typedef socket_base<proto> socket_type;
 
-        /* Disable value semantics. Copy or assignment is not allowed. */
+        /* Disabled copy and assignment. */
         socket_base(const socket_base&) = delete;
         socket_base& operator=(const socket_base&) = delete;
 
+        socket_base()
+            : _fd(proto::badfd){}
+        socket_base(socket_base&& s)
+            : _fd(s._fd) { s._fd = proto::badfd; }
+
         explicit socket_base(int fd) : _fd(fd) {}
 
-        explicit socket_base(bool init = false)
-            : _fd(init ? proto::create() : proto::badfd) {
-            if (init && _fd == proto::badfd) {
-                throw socket_exception("Failed to create a new socket.");
-            }
-        }
-
-        socket_base(socket_base&& s) : _fd(s._fd) {
-            s._fd = proto::badfd;
-        }
-
         ~socket_base() { close(); }
+
+        /* Creates a new socket.
+         * Throws a socket_exception if the creation fails.
+         */
+        static socket_base&& new_socket() {
+            socket_base sock;
+            if ((sock._fd = proto::create()) == proto::badfd){
+                throw socket_exception("failed to create socket.", last_error());
+            }
+            return std::move(sock);
+        }
 
         /* Test whether the underlying file descriptor is bad.
          * This method doesn't validate the file descriptor.
          */
-        bool bad() const { return _fd == proto::badfd; }
+        bool bad() const {
+            return _fd == proto::badfd;
+        }
 
         /* Close the socket. */
-        void close() { proto::close(_fd); }
+        void close() {
+            proto::close(_fd);
+        }
 
         void swap(socket_base& another) {
             std::swap(_fd, another._fd);
@@ -111,9 +119,11 @@ namespace nio{
         int native_handle() { return _fd; }
 
     private:
+        /* The underlying file descriptor. */
         int _fd;
     };
 
+    /* TCP socket */
     typedef socket_base<proto_tcp> tcp_socket;
 }
 

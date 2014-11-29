@@ -1,20 +1,20 @@
 #pragma once
-#include <hydrogen/nio/inet_proto.h>
+#include <hydrogen/nio/protocols.h>
 
 namespace nio{
     /*
-     * iosocket represents a TCP socket object for blocked/synchronized IO.
+     * stream_socket represents a TCP socket object for blocked/synchronized IO.
      * Value semantics is disabled, thus no copy or assignment is allowed.
      */
-    class iosocket : public tcp_socket {
+    class stream_socket : public tcp_socket {
     public:
         /* read/write mask bits */
         static const int readable = 0x01;
         static const int writable = 0x01 << 1;
 
-        iosocket();
-        iosocket(tcp_socket&& sock, int rw = readable | writable);
-        iosocket(iosocket&& sock);
+        stream_socket();
+        stream_socket(tcp_socket&& s, int rw = readable | writable);
+        stream_socket(stream_socket&& s);
 
         /* Read some bytes from the socket, returns number of bytes actually read.
          * If the read operation failed, this method throws a socket_exception.
@@ -38,7 +38,7 @@ namespace nio{
          */
         void write(const char* buf, size_t len, int flag = 0);
 
-        void swap(iosocket& sock) {
+        void swap(stream_socket& sock) {
             tcp_socket::swap(sock);
             std::swap(_rwmask, sock._rwmask);
             std::swap(_rdcount, sock._rdcount);
@@ -70,4 +70,4 @@ namespace nio{
     };
 }
 
-IMPLEMENT_STD_SWAP(nio::iosocket)
+IMPLEMENT_STD_SWAP(nio::stream_socket)

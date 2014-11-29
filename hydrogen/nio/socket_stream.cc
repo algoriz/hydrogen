@@ -5,9 +5,9 @@ using namespace nio;
 
 socket_stream::socket_stream(){}
 
-socket_stream::socket_stream(iosocket&& sock) : _sock(std::move(sock)){}
+socket_stream::socket_stream(stream_socket&& sock) : _sock(std::move(sock)){}
 
-void socket_stream::attach(iosocket&& sock){
+void socket_stream::attach(stream_socket&& sock){
     if (!_sock.bad()) {
         throw socket_exception("can't attach socket to a open stream");
     }
@@ -56,7 +56,7 @@ void socket_stream::open(const endpoint& ep){
         throw socket_exception("could not connect.");
     }
 
-    _sock.swap(iosocket(std::move(s)));
+    _sock.swap(stream_socket(std::move(s)));
 }
 
 void socket_stream::open(const char* uname){

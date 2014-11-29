@@ -8,10 +8,16 @@ using namespace nio;
 #pragma comment(lib, "nio")
 
 int main(){
-    auto ep = endpoint::localhost(7070);
-
     WSADATA d = { 0 };
     ::WSAStartup(MAKEWORD(2, 2), &d);
+    
+    endpoint ep;
+    try {
+        ep = endpoint::localhost(7070);
+    }
+    catch (nio::exception e){
+        std::cerr << e.what() << '\n';
+    }
 
     auto f1 = [&ep]()->void {
         try {
