@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 #include <hydrogen/nio/exceptions.h>
 #include <hydrogen/stdhelp.h>
 
@@ -28,9 +29,7 @@ namespace nio{
         /* Converts to uniform address */
         std::string to_uname() const;
 
-        /* Parses a uniform address.
-        * format = tcp://<host>:<port>
-        */
+        /* Parses a uniform address. format = tcp://<host>:<port> */
         static endpoint from_uname(const char* uname);
 
         /* endpoint bind to 127.0.0.1 */
@@ -76,26 +75,39 @@ namespace nio{
     public:
         typedef proto_traits proto;
 
-        /* Disabled copy and assignment. */
+        /* Disabled value-semantics copy and assignment. */
         socket_base(const socket_base&) = delete;
         socket_base& operator=(const socket_base&) = delete;
 
         socket_base()
             : _fd(proto::badfd){}
-        socket_base(socket_base&& s)
-            : _fd(s._fd) { s._fd = proto::badfd; }
-
         explicit socket_base(int fd) : _fd(fd) {}
 
         ~socket_base() { close(); }
 
+        /* Supports move */
+        socket_base(socket_base&& s)
+            : _fd(s._fd) {
+            s._fd = proto::badfd;
+        }
+
+        /* Supports move assignment */
+        socket_base& operator= (socket_base&& tmp) {
+            if (this != &tmp){
+                close();
+                _fd = tmp._fd;
+                tmp._fd = proto::badfd;
+            }
+            return *this;
+        }
+
         /* Creates a new socket.
          * Throws a socket_exception if the creation fails.
          */
-        static socket_base&& new_socket() {
+        static socket_base new_socket() {
             socket_base sock;
             if ((sock._fd = proto::create()) == proto::badfd){
-                throw socket_exception("failed to create socket.", last_error());
+                throw socket_exception(socket_error::last());
             }
             return std::move(sock);
         }

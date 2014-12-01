@@ -3,18 +3,29 @@
 using namespace nio;
 
 
-socket_acceptor::socket_acceptor(): tcp_socket(false){}
+socket_acceptor::socket_acceptor(){}
 
-socket_acceptor::socket_acceptor(const endpoint& ep)
-    : tcp_socket(true){
-    bind(ep);
-    listen();
+socket_acceptor::socket_acceptor(const endpoint& ep, int backlog) {
+    listen(ep, backlog);
+}
+
+socket_acceptor::socket_acceptor(socket_acceptor&& a){
+    swap(a);
+}
+
+socket_acceptor& socket_acceptor::operator=(socket_acceptor&& a){
+    if (this != &a){
+        assert(bad());
+        tcp_socket::swap(a);
+        _name = a._name;
+    }
+    return *this;
 }
 
 void socket_acceptor::bind(const endpoint& ep) {
     auto addr = ep.getaddr();
     if (::bind(native_handle(), (sockaddr*)&addr, sizeof(addr))) {
-        throw socket_exception(hy::strcat("socket bind failed: ", ep.to_uname()), last_error());
+        throw socket_exception(socket_error::last());
     }
     _name = ep;
 }
@@ -28,22 +39,18 @@ void socket_acceptor::listen(const endpoint& ep, int backlog) {
 }
 
 void socket_acceptor::listen(int backlog) {
-    if (_name.bad()) {
-        throw socket_exception("Socket not bind before listen.");
-    }
-
     if (::listen(native_handle(), backlog)) {
-        throw socket_exception(hy::strcat("socket listen failed: ", _name.to_uname()), last_error());
+        throw socket_exception(socket_error::last());
     }
 }
 
-stream_socket&& socket_acceptor::accept() {
+stream_socket socket_acceptor::accept() {
     sockaddr_in addr;
     int len = sizeof(addr);
     int fd = ::accept(native_handle(), reinterpret_cast<sockaddr*>(&addr), &len);
-    tcp_socket s(fd);
-    if (s.bad()) {
-        throw socket_exception("socket accept failed.");
+    if (fd == proto::badfd) {
+        throw socket_exception(socket_error::last());
     }
-    return std::move(stream_socket(std::move(s)));
+    return stream_socket(
+        tcp_socket(fd), stream_socket::readable | stream_socket::writable);
 }

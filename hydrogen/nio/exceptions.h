@@ -1,11 +1,11 @@
 #pragma once
 #include <stdexcept>
-#include <thread>
+#include <cassert>
 #include <hydrogen/varadic.h>
 
 namespace nio {
     /* Network IO specific error codes */
-    class error_code {
+    class socket_error {
     public:
         static const int success = 0;
         static const int access_denied = EACCES;
@@ -14,37 +14,37 @@ namespace nio {
         static const int not_socket = ENOTSOCK;
         static const int out_of_memory = ENOMEM;
         static const int operation_no_supported = EOPNOTSUPP;
+        static const int connection_reset = 54;
 
+        /* Get last error */
+        static int last();
     };
 
-    /* Get last error */
-    int last_error();
+    class host_not_found : public std::exception {
+    public:
+        host_not_found(const char* host = nullptr)
+            : std::exception("nio::host_not_found"){
+            if (host){
+                _host = host;
+            }
+        }
 
-    struct exception {
-        exception()
-            : _what("unknown nio::exception"), _error(error_code::success){}
-        exception(int error)
-            : _error(error){}
-        exception(const char* msg, int error = error_code::success)
-            : exception(std::string(msg), error){}
-        exception(std::string&& msg, int error = error_code::success)
-            : _error(error), _what(std::move(msg)){}
+        const std::string& host() { return _host; }
 
-        int error() const { return _error; }
-        const std::string& what() const { return _what; }
+    private:
+        std::string _host;
+    };
+
+    class socket_exception : public std::exception {
+    public:
+        socket_exception(int error = socket_error::success)
+            : std::exception("nio::socket_exception"), _error(error){}
+
+        int error_code() const {
+            return _error;
+        }
 
     private:
         int _error;
-        std::string _what;
-    };
-
-    class socket_exception : public exception {
-    public:
-        socket_exception()
-            : exception("unknown nio::socket_exception"){}
-        socket_exception(const char* msg, int error = error_code::success)
-            : exception(std::string(msg), error){}
-        socket_exception(std::string&& msg, int error = error_code::success)
-            : exception(std::move(msg), error){}
     };
 }

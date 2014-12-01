@@ -16,7 +16,7 @@ endpoint::endpoint(const char* host, int port){
         _addr.sin_port = ::htons(port);
     }
     else {
-        throw socket_exception(hy::strcat("Host resolve failed: ", host));
+        throw host_not_found(host);
     }
 }
 
@@ -29,8 +29,9 @@ endpoint endpoint::from_uname(const char* uname){
             return endpoint(host.c_str(), atoi(p));
         }
     }
-    /* bad uniform address string */
-    return endpoint();
+
+    throw std::invalid_argument(
+        hy::strcat("Invalid uniform address string: ", uname).c_str());
 }
 
 std::string endpoint::to_uname() const {
@@ -39,5 +40,5 @@ std::string endpoint::to_uname() const {
             _addr.sin_addr.S_un.S_un_b.s_b1, _addr.sin_addr.S_un.S_un_b.s_b2,
             _addr.sin_addr.S_un.S_un_b.s_b3, _addr.sin_addr.S_un.S_un_b.s_b4,
             (int)::ntohs(_addr.sin_port));
-    return std::string(buf);
+    return buf;
 }

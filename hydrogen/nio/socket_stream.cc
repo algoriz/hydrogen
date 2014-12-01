@@ -5,34 +5,41 @@ using namespace nio;
 
 socket_stream::socket_stream(){}
 
-socket_stream::socket_stream(stream_socket&& sock) : _sock(std::move(sock)){}
+socket_stream::socket_stream(stream_socket&& sock) : _socket(std::move(sock)){}
 
-void socket_stream::attach(stream_socket&& sock){
-    if (!_sock.bad()) {
-        throw socket_exception("can't attach socket to a open stream");
+socket_stream::socket_stream(const endpoint& ep){
+    open(ep);
+}
+
+socket_stream& socket_stream::operator=(socket_stream&& s){
+    if (this != &s){
+        assert(_socket.bad());
+        swap(s);
     }
-    sock.swap(_sock);
+    return *this;
 }
 
 void socket_stream::read(char* buf, size_t bytes) {
     local_read(buf, bytes);
     if (bytes) {
-        _sock.read(buf, bytes);
+        _socket.read(buf, bytes);
     }
 }
 
-void socket_stream::read_some(char* buf, size_t bytes) {
-    if (!local_read(buf, bytes) && bytes) {
-        _sock.read_some(buf, bytes);
+size_t socket_stream::read_some(char* buf, size_t bytes) {
+    size_t rd = local_read(buf, bytes);
+    if (!rd && bytes) {
+        rd += _socket.read_some(buf, bytes);
     }
+    return rd;
 }
 
 void socket_stream::write(const char* buf, size_t bytes) {
-    _sock.write(buf, bytes);
+    _socket.write(buf, bytes);
 }
 
-void socket_stream::write_some(const char* buf, size_t bytes) {
-    _sock.write_some(buf, bytes);
+size_t socket_stream::write_some(const char* buf, size_t bytes) {
+    return _socket.write_some(buf, bytes);
 }
 
 size_t socket_stream::local_read(char*& buf, size_t& count){
@@ -49,14 +56,16 @@ size_t socket_stream::local_read(char*& buf, size_t& count){
 }
 
 void socket_stream::open(const endpoint& ep){
-    tcp_socket s(true);
+    assert(_socket.bad());
 
+    tcp_socket s = tcp_socket::new_socket();
     auto addr = ep.getaddr();
     if (::connect(s.native_handle(), (sockaddr*)&addr, sizeof(addr))){
-        throw socket_exception("could not connect.");
+        throw socket_exception(socket_error::last());
     }
 
-    _sock.swap(stream_socket(std::move(s)));
+    _socket.swap(stream_socket(
+        std::move(s), stream_socket::readable | stream_socket::writable));
 }
 
 void socket_stream::open(const char* uname){
@@ -87,7 +96,7 @@ void socket_stream::getline(char* dst, size_t count, char delim){
     /* All bytes in the buffer have been copied to dst, then we should read 
      * data from the socket.
      */
-    int rd = _sock.read_some(dst, count);
+    size_t rd = _socket.read_some(dst, count);
 
     char* p = dst;
     char* pend = dst + rd;
@@ -96,8 +105,8 @@ void socket_stream::getline(char* dst, size_t count, char delim){
     }
 
     if (delimed){
-        *p = '\0';
-        ++p;
+        *(p - 1) = '\0';
+        
         /* Copy bytes after delimiter back to buffer */
         _buf.assign(p, pend - p);
     }
