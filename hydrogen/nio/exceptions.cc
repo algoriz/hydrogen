@@ -1,7 +1,7 @@
 #include <hydrogen/nio/protocols.h>
 #include <hydrogen/nio/exceptions.h>
 
-int nio::socket_error::last(){
+int hy::socket_error::last(){
 #ifdef _WIN32
     return ::WSAGetLastError() - WSABASEERR;
 #else

@@ -3,7 +3,7 @@
 #include <cassert>
 #include <hydrogen/common/varadic.h>
 
-namespace nio {
+namespace hy {
     /* Network IO specific error codes */
     class socket_error {
     public:
@@ -23,7 +23,7 @@ namespace nio {
     class host_not_found : public std::exception {
     public:
         host_not_found(const char* host = nullptr)
-            : std::exception("nio::host_not_found"){
+            : std::exception("hy::host_not_found"){
             if (host){
                 _host = host;
             }
@@ -38,7 +38,7 @@ namespace nio {
     class socket_exception : public std::exception {
     public:
         socket_exception(int error = socket_error::success)
-            : std::exception("nio::socket_exception"), _error(error){}
+            : std::exception("hy::socket_exception"), _error(error){}
 
         int error_code() const {
             return _error;

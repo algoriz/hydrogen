@@ -1,6 +1,6 @@
 #include <hydrogen/nio/stream_socket.h>
 
-using namespace nio;
+using namespace hy;
 
 stream_socket::stream_socket()
     : _rwmask(0), _bytes_in(0), _bytes_out(0){}

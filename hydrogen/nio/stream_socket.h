@@ -1,7 +1,7 @@
 #pragma once
 #include <hydrogen/nio/protocols.h>
 
-namespace nio{
+namespace hy{
     /*
      * stream_socket represents a TCP socket object for blocked/synchronized IO.
      * Value semantics is disabled, thus no copy or assignment is allowed.
@@ -72,4 +72,4 @@ namespace nio{
     };
 }
 
-IMPLEMENT_STD_SWAP(nio::stream_socket)
+IMPLEMENT_STD_SWAP(hy::stream_socket)

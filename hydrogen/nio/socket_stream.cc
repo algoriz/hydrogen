@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <hydrogen/nio/socket_stream.h>
 
-using namespace nio;
+using namespace hy;
 
 socket_stream::socket_stream()
     : _buf(4096){}

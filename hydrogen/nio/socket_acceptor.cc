@@ -1,6 +1,6 @@
 #include <hydrogen/nio/socket_acceptor.h>
 
-using namespace nio;
+using namespace hy;
 
 
 socket_acceptor::socket_acceptor(){}

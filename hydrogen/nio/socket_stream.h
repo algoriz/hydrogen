@@ -4,7 +4,7 @@
 #include <hydrogen/nio/stream_socket.h>
 #include <hydrogen/common/queue_buffer.h>
 
-namespace nio{
+namespace hy{
     /* socket_stream encapsulates stream_socket and provides std::iostream-like
      * methods to do synchronized(and blocked) IO.
      */
@@ -66,4 +66,4 @@ namespace nio{
     };
 }
 
-IMPLEMENT_STD_SWAP(nio::socket_stream)
+IMPLEMENT_STD_SWAP(hy::socket_stream)

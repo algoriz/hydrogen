@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #endif
 
-namespace nio{
+namespace hy{
     class endpoint {
     public:
         endpoint();
@@ -139,4 +139,4 @@ namespace nio{
     typedef socket_base<proto_tcp> tcp_socket;
 }
 
-IMPLEMENT_STD_SWAP(nio::tcp_socket)
+IMPLEMENT_STD_SWAP(hy::tcp_socket)

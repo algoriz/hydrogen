@@ -1,7 +1,7 @@
 #pragma once
 #include <hydrogen/nio/stream_socket.h>
 
-namespace nio {
+namespace hy {
     class socket_acceptor : public tcp_socket {
     public:
         socket_acceptor();

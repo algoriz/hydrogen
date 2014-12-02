@@ -1,6 +1,6 @@
 #include <hydrogen/nio/protocols.h>
 
-using namespace nio;
+using namespace hy;
 
 #ifdef WIN32
 namespace {
