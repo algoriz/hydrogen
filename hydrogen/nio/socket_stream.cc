@@ -3,17 +3,24 @@
 
 using namespace nio;
 
-socket_stream::socket_stream(){}
+socket_stream::socket_stream()
+    : _buf(4096){}
 
-socket_stream::socket_stream(stream_socket&& sock) : _socket(std::move(sock)){}
+socket_stream::socket_stream(stream_socket&& sock)
+    : _buf(4096), _socket(std::move(sock)){}
 
-socket_stream::socket_stream(const endpoint& ep){
+socket_stream::socket_stream(const endpoint& ep)
+    : _buf(4096){
     open(ep);
+}
+
+socket_stream::socket_stream(socket_stream&& s)
+    : _buf(std::move(s._buf)), _socket(std::move(s._socket)){
 }
 
 socket_stream& socket_stream::operator=(socket_stream&& s){
     if (this != &s){
-        assert(_socket.bad());
+        close();
         swap(s);
     }
     return *this;
@@ -45,10 +52,8 @@ size_t socket_stream::write_some(const char* buf, size_t bytes) {
 size_t socket_stream::local_read(char*& buf, size_t& count){
     size_t rd = 0;
     if (!_buf.empty()){
-        size_t buflen = _buf.length();
-        rd = count < buflen ? count : buflen;
-        _buf.copy(buf, rd);
-        _buf.erase(0, rd);
+        rd = _buf.copy(buf, count);
+        _buf.pop(rd);
         buf += rd;
         count -= rd;
     }
@@ -74,40 +79,39 @@ void socket_stream::open(const char* uname){
 
 void socket_stream::getline(char* dst, size_t count, char delim){
     bool delimed = false;
-    if (!_buf.empty()){
-        const char* src = _buf.c_str();
-        size_t len = _buf.length();
-        size_t max_bytes = count < len ? count : len;
-        size_t bytes = 0;
-        while (bytes < max_bytes && !(delimed = (src[bytes] == delim))){
-            ++bytes;
-        }
-        memcpy(dst, src, bytes);
-        _buf.erase(0, bytes + delimed);
-        if (delimed || bytes == count){
-            /* The getline request has been fulfilled by the buffer data */
-            return ;
+    while (!delimed && count){
+        if (_buf.empty()){
+            _buf.trim();
+            _buf.push(_socket.read_some(_buf.tail(), _buf.free()));
         }
 
-        dst += bytes;
+        char* src = _buf.front();
+        char* end = src + (_buf.length() < count ? _buf.length() : count);
+        while (!delimed && src != end){
+            delimed = (*src == delim);
+            *dst++ = *src++;
+        }
+
+        size_t bytes = src - _buf.front();
+        _buf.pop(bytes);
         count -= bytes;
     }
 
-    /* All bytes in the buffer have been copied to dst, then we should read 
-     * data from the socket.
-     */
-    size_t rd = _socket.read_some(dst, count);
-
-    char* p = dst;
-    char* pend = dst + rd;
-    for (; !delimed && p < pend; ++p){
-        delimed = (*p == delim);
-    }
-
     if (delimed){
-        *(p - 1) = '\0';
-        
-        /* Copy bytes after delimiter back to buffer */
-        _buf.assign(p, pend - p);
+        *(dst - 1) = 0;
     }
+}
+
+int socket_stream::getch(){
+    if (_buf.empty()){
+        _buf.trim();
+        _buf.push(_socket.read_some(_buf.tail(), _buf.free()));
+    }
+
+    int ch = EOF;
+    if (!_buf.empty()){
+        ch = *_buf.front();
+        _buf.pop(1);
+    }
+    return ch;
 }

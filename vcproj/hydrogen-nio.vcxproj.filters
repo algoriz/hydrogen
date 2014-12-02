@@ -37,13 +37,13 @@
     <ClCompile Include="..\hydrogen\nio\socket_acceptor.cc">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="exceptions.cc">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="..\hydrogen\nio\stream_socket.cc">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\hydrogen\nio\protocols.cc">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hydrogen\nio\exceptions.cc">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

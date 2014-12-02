@@ -2,6 +2,7 @@
 #include <string>
 #include <hydrogen/nio/protocols.h>
 #include <hydrogen/nio/stream_socket.h>
+#include <hydrogen/common/queue_buffer.h>
 
 namespace nio{
     /* socket_stream encapsulates stream_socket and provides std::iostream-like
@@ -15,12 +16,13 @@ namespace nio{
         /* Opens a new socket_stream */
         socket_stream(const endpoint& ep);
 
-        /* Constructs from an stream_socket object.
+        /* Constructs a socket_stream from an stream_socket object.
          * The constructed socket_stream object will take the ownership of the
          * stream_socket object.
          */
         socket_stream(stream_socket&& sock);
-
+        
+        socket_stream(socket_stream&& s);
         socket_stream& operator= (socket_stream&& s);
 
         /* Opens a new socket_stream. */
@@ -30,7 +32,7 @@ namespace nio{
         /* Closes the socket_stream. */
         void close(){
             _socket.close();
-            _buf.clear();
+            _buf.release();
         }
 
         void swap(socket_stream& another){
@@ -45,6 +47,7 @@ namespace nio{
         size_t write_some(const char* buf, size_t bytes);
 
         void getline(char* buf, size_t count, char delim = '\n');
+        int  getch();
 
         size_t tellg() const { return _socket.bytes_in() - _buf.length(); }
         size_t tellp() const { return _socket.bytes_out(); }
@@ -58,8 +61,8 @@ namespace nio{
         /* The underlying socket */
         stream_socket _socket;
 
-        /* Buffer for read parsing */
-        std::string _buf;
+        /* Buffer for socket reading */
+        hy::queue_buffer<char> _buf;
     };
 }
 

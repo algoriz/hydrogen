@@ -2,6 +2,23 @@
 
 using namespace nio;
 
+#ifdef WIN32
+namespace {
+    class winsock_init {
+    public:
+        winsock_init(){
+            WSADATA wd = { 0 };
+            ::WSAStartup(MAKEWORD(2, 2), &wd);
+        }
+
+        ~winsock_init(){
+            ::WSACleanup();
+        }
+    };
+    static winsock_init init;
+}
+#endif // WIN32
+
 endpoint::endpoint(){
     memset(&_addr, 0, sizeof(_addr));
 }

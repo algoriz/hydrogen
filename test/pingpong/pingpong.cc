@@ -5,7 +5,7 @@
 
 using namespace nio;
 
-#pragma comment(lib, "nio")
+#pragma comment(lib, "hydrogen-nio")
 
 class EchoServer {
 public:
@@ -17,17 +17,19 @@ public:
 
         void operator()(){ run(); }
 
-        void run(){
+        void run() try {
             char buf[4096];
-            try {
-                for (int i = 0; i < 10000; ++i) {
-                    auto size = _client.read_some(buf, sizeof(buf));
-                    _client.write(buf, size);
+            while (true) {
+                auto size = _client.read_some(buf, sizeof(buf));
+                if (!size){
+                    std::cout << "EchoServerClient exit...\n";
+                    break;
                 }
+                _client.write(buf, size);
             }
-            catch (nio::socket_exception e){
-                std::cerr << "EchoServerClient exception out: " << e.what() << '\n';
-            }
+        }
+        catch (nio::socket_exception e){
+            std::cerr << "EchoServerClient exception out: " << e.what() << '\n';
         }
 
     private:
@@ -38,22 +40,20 @@ public:
 
     void operator()(){ run(); }
 
-    void run(){
-        try {
-            socket_acceptor acceptor;
-            acceptor.listen(_name);
+    void run() try {
+        socket_acceptor acceptor;
+        acceptor.listen(_name);
 
-            while (true){
-                EchoServerClient c(acceptor.accept());
-                c.run();
-            }
+        while (true){
+            EchoServerClient c(acceptor.accept());
+            c.run();
         }
-        catch (nio::socket_exception e) {
-            std::cerr << "EchoServer exception: " << e.what() << '\n';
-        }
-        catch (...){
-            std::cerr << "unknown exception captured.\n";
-        }
+    }
+    catch (nio::socket_exception e) {
+        std::cerr << "EchoServer exception: " << e.what() << '\n';
+    }
+    catch (...){
+        std::cerr << "unknown exception captured.\n";
     }
 
 private:
@@ -63,23 +63,15 @@ private:
 class PingpongTest {
 public:
     PingpongTest(endpoint ep) : _name(ep){}
-    void operator()() {
-        try {
-            run();
-        }
-        catch (nio::socket_exception e){
-            std::cerr << "PingpongTest exception out, " << e.what() << '\n';
-        }
-    }
+    void operator()() { run(); }
 
-    void run() {
+    void run() try {
         socket_stream stream(_name);
         char wbuf[4096];
         char rbuf[sizeof(wbuf)];
 
         int size = 16;
-        std::chrono::high_resolution_clock clk;
-        auto t1 = clk.now();
+        auto t1 = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 10000; ++i) {
             memset(wbuf, 0x61616161, size);
             wbuf[0] = '(';
@@ -97,9 +89,12 @@ public:
                 size = sizeof(wbuf);
             }
         }
-        auto tm = clk.now() - t1;
+        auto tm = std::chrono::high_resolution_clock::now() - t1;
         std::cout << "IO time: " << tm.count() << '\n';
         std::cout << "PingpongTest send: " << stream.tellg() << ", recv: " << stream.tellp() << '\n';
+    }
+    catch (nio::socket_exception e){
+        std::cerr << "PingpongTest exception out, " << e.what() << '\n';
     }
 
 private:
@@ -109,16 +104,9 @@ private:
 class LineByLineTest {
 public:
     LineByLineTest(endpoint ep) : _name(ep){}
-    void operator()() {
-        try {
-            run();
-        }
-        catch (nio::socket_exception e){
-            std::cerr << "LineByLineTest exception out, " << e.what() << '\n';
-        }
-    }
+    void operator()() { run(); }
 
-    void run(){
+    void run() try {
         socket_stream s;
         s.open(_name);
 
@@ -157,6 +145,9 @@ public:
         s.getline(buf, 5004);
         validate(l5000 == buf, "LineByLineTest #5");
     }
+    catch (nio::socket_exception e){
+        std::cerr << "LineByLineTest exception out, " << e.what() << '\n';
+    }
 
     void validate(bool r, const char* test){
         std::cout << test << ": " << (r ? "PASSED\n" : "FAILED\n");
@@ -167,18 +158,14 @@ private:
 
 
 int main(){
-    WSADATA d = { 0 };
-    ::WSAStartup(MAKEWORD(2, 2), &d);
-    
     endpoint ep = endpoint::localhost(7070);
-
 
     std::thread th2([&ep]()->void {
         EchoServer server(ep);
         server.run();
     });
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     std::thread th1([&ep]()->void {
         PingpongTest pptest(ep);
@@ -190,7 +177,5 @@ int main(){
     
     th1.join();
     th2.join();
-
-    ::WSACleanup();
     return 0;
 }

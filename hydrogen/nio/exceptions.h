@@ -1,7 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include <cassert>
-#include <hydrogen/varadic.h>
+#include <hydrogen/common/varadic.h>
 
 namespace nio {
     /* Network IO specific error codes */

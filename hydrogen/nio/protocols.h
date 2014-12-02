@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <hydrogen/nio/exceptions.h>
-#include <hydrogen/stdhelp.h>
+#include <hydrogen/common/stdhelp.h>
 
 #ifdef WIN32
 #include <WinSock2.h>
@@ -75,7 +75,7 @@ namespace nio{
     public:
         typedef proto_traits proto;
 
-        /* Disabled value-semantics copy and assignment. */
+        /* Disable copy and assignment. */
         socket_base(const socket_base&) = delete;
         socket_base& operator=(const socket_base&) = delete;
 
