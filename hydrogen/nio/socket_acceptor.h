@@ -2,6 +2,9 @@
 #include <hydrogen/nio/stream_socket.h>
 
 namespace hy {
+    /*
+     * socket_acceptor represents a TCP socket object for listening.
+     */
     class socket_acceptor : public tcp_socket {
     public:
         socket_acceptor();

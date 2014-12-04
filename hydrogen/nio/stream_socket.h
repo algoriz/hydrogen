@@ -4,13 +4,12 @@
 namespace hy{
     /*
      * stream_socket represents a TCP socket object for blocked/synchronized IO.
-     * Value semantics is disabled, thus no copy or assignment is allowed.
      */
     class stream_socket : public tcp_socket {
     public:
         /* read/write mask bits */
-        static const int readable = 0x01;
-        static const int writable = 0x01 << 1;
+        static const unsigned int readable = 0x01;
+        static const unsigned int writable = 0x01 << 1;
 
         stream_socket();
         stream_socket(tcp_socket&& s, int rw);
@@ -28,13 +27,13 @@ namespace hy{
          */
         size_t write_some(const char* buf, size_t len, int flag = 0);
 
-        /* Read specified bytes from the socket.
+        /* Read specified number of bytes from the socket.
          * If the connection is closed or an error occurs before the specified bytes
          * are read, this method throws a socket_exception.
          */
         void read(char* buf, size_t len, int flag = 0);
 
-        /* Write specified bytes into the socket.
+        /* Write specified number of bytes into the socket.
          * If the connection is closed or an error occurs before the specified bytes
          * are written, this method throws a socket_exception.
          */
@@ -64,7 +63,7 @@ namespace hy{
 
     private:
         /* read/write availability */
-        int _rwmask;
+        unsigned int _rwmask;
 
         /* read/write counter */
         size_t _bytes_in;
