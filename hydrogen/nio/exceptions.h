@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <hydrogen/common/varadic.h>
+#include <cerrno>
 
 namespace hy {
     /* Network IO specific error codes */
@@ -20,10 +21,24 @@ namespace hy {
         static int last();
     };
 
-    class host_not_found : public std::exception {
+    class exception {
+    public:
+        exception(const char* message = nullptr){
+            if (message != nullptr){
+                _message.assign(message);
+            }
+        }
+
+        const std::string& what() const { return _message; }
+    
+    private:
+        std::string _message;
+    };
+
+    class host_not_found : public exception {
     public:
         host_not_found(const char* host = nullptr)
-            : std::exception("hy::host_not_found"){
+            : exception("hy::host_not_found"){
             if (host){
                 _host = host;
             }
@@ -35,10 +50,10 @@ namespace hy {
         std::string _host;
     };
 
-    class socket_exception : public std::exception {
+    class socket_exception : public exception {
     public:
         socket_exception(int error = socket_error::success)
-            : std::exception("hy::socket_exception"), _error(error){}
+            : exception("hy::socket_exception"), _error(error){}
 
         int error_code() const {
             return _error;
