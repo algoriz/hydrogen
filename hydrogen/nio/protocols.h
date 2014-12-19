@@ -4,11 +4,17 @@
 #include <hydrogen/common/stdhelp.h>
 
 #ifdef WIN32
+/* Windows socket headers */
 #include <WinSock2.h>
 #pragma comment(lib, "ws2_32")
 #else
+/* Unix socket headers */
+#include <unistd.h>
 #include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#define closesocket close
 #endif
 
 namespace hy{
@@ -64,8 +70,8 @@ namespace hy{
 
         static void close(int fd) {
             if (fd != badfd) {
-                ::shutdown(fd, 2);
-                ::closesocket(fd);
+                shutdown(fd, 2);
+                closesocket(fd);
             }
         }
     };

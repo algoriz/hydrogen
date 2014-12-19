@@ -26,11 +26,11 @@ endpoint::endpoint(){
 endpoint::endpoint(const char* host, int port){
     memset(&_addr, 0, sizeof(_addr));
 
-    hostent* ent = ::gethostbyname(host);
+    hostent* ent = gethostbyname(host);
     if (ent && ent->h_addr_list[0]){
         _addr.sin_family = AF_INET;
-        _addr.sin_addr.S_un.S_addr = *reinterpret_cast<u_long*>(ent->h_addr_list[0]);
-        _addr.sin_port = ::htons(port);
+        _addr.sin_addr.s_addr = *reinterpret_cast<u_long*>(ent->h_addr_list[0]);
+        _addr.sin_port = htons(port);
     }
     else {
         throw host_not_found(host);
@@ -38,7 +38,18 @@ endpoint::endpoint(const char* host, int port){
 }
 
 endpoint endpoint::from_uname(const char* uname){
-    if (!_strnicmp(uname, "tcp://", 6)){
+    char schema[8] = "tcp://";
+    const size_t schema_len = 6;
+
+    bool bad_schema = false;
+    for (size_t i = 0; i < schema_len; ++i){
+        if (tolower(uname[i]) != schema[i]){
+            bad_schema = true;
+            break;
+        }
+    }
+
+    if (!bad_schema){
         uname += 6;
         if (const char* p = strchr(uname, ':')){
             std::string host(uname, p - uname);
@@ -47,15 +58,16 @@ endpoint endpoint::from_uname(const char* uname){
         }
     }
 
-    throw std::invalid_argument(
-        hy::strcat("Invalid uniform address string: ", uname).c_str());
+    throw exception(hy::strcat("Invalid uniform address string: ", uname).c_str());
 }
 
 std::string endpoint::to_uname() const {
     char buf[128];
-    ::sprintf(buf, "tcp://%d.%d.%d.%d:%d",
-            _addr.sin_addr.S_un.S_un_b.s_b1, _addr.sin_addr.S_un.S_un_b.s_b2,
-            _addr.sin_addr.S_un.S_un_b.s_b3, _addr.sin_addr.S_un.S_un_b.s_b4,
-            (int)::ntohs(_addr.sin_port));
+    struct {
+        unsigned char b1, b2, b3, b4;
+    } addr;
+    memcpy(&addr, &(_addr.sin_addr), sizeof(addr));
+    sprintf(buf, "tcp://%d.%d.%d.%d:%d", addr.b1, addr.b2, addr.b3, addr.b4,
+            (int)ntohs(_addr.sin_port));
     return buf;
 }

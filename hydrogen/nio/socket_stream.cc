@@ -69,8 +69,9 @@ void socket_stream::open(const endpoint& ep){
         throw socket_exception(socket_error::last());
     }
 
-    _socket.swap(stream_socket(
-        std::move(s), stream_socket::readable | stream_socket::writable));
+    auto tmp = stream_socket(std::move(s),
+        stream_socket::readable | stream_socket::writable);
+    _socket = std::move(tmp);
 }
 
 void socket_stream::open(const char* uname){

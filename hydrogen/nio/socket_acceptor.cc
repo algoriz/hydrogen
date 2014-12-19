@@ -32,7 +32,8 @@ void socket_acceptor::bind(const endpoint& ep) {
 
 void socket_acceptor::listen(const endpoint& ep, int backlog) {
     if (bad()){
-        tcp_socket::swap(tcp_socket::new_socket());
+        auto tmp = tcp_socket::new_socket();
+        tcp_socket::swap(tmp);
     }
     bind(ep);
     listen(backlog);
@@ -46,7 +47,7 @@ void socket_acceptor::listen(int backlog) {
 
 stream_socket socket_acceptor::accept() {
     sockaddr_in addr;
-    int len = sizeof(addr);
+    socklen_t len = sizeof(addr);
     int fd = ::accept(native_handle(), reinterpret_cast<sockaddr*>(&addr), &len);
     if (fd == proto::badfd) {
         throw socket_exception(socket_error::last());
