@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="..\hydrogen\common\queue_buffer.h" />
     <ClInclude Include="..\hydrogen\common\stdhelp.h" />
+    <ClInclude Include="..\hydrogen\common\string.h" />
     <ClInclude Include="..\hydrogen\common\varadic.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

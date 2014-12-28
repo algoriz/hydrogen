@@ -3,14 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pingpong", "test\pingpong\pingpong.vcxproj", "{1C84960C-C82F-49C0-814D-7D142EBD7423}"
-	ProjectSection(ProjectDependencies) = postProject
-		{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E} = {BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hydrogen-common", "vcproj\hydrogen-common.vcxproj", "{77914976-0EE0-4FCF-88F8-EA257CBF55EF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hydrogen-nio", "vcproj\hydrogen-nio.vcxproj", "{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{77914976-0EE0-4FCF-88F8-EA257CBF55EF} = {77914976-0EE0-4FCF-88F8-EA257CBF55EF}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{03EFC39B-0E1D-42A7-BD93-C2E15EF166C0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pingpong", "test\pingpong\pingpong.vcxproj", "{1C84960C-C82F-49C0-814D-7D142EBD7423}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E} = {BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}
+		{77914976-0EE0-4FCF-88F8-EA257CBF55EF} = {77914976-0EE0-4FCF-88F8-EA257CBF55EF}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_tests", "test\common_tests\common_tests.vcxproj", "{A20C96E6-F91D-4392-87ED-27264C48B71B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{77914976-0EE0-4FCF-88F8-EA257CBF55EF} = {77914976-0EE0-4FCF-88F8-EA257CBF55EF}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +29,6 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Debug|Win32.ActiveCfg = Debug|Win32
-		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Debug|Win32.Build.0 = Debug|Win32
-		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Release|Win32.ActiveCfg = Release|Win32
-		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Release|Win32.Build.0 = Release|Win32
 		{77914976-0EE0-4FCF-88F8-EA257CBF55EF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{77914976-0EE0-4FCF-88F8-EA257CBF55EF}.Debug|Win32.Build.0 = Debug|Win32
 		{77914976-0EE0-4FCF-88F8-EA257CBF55EF}.Release|Win32.ActiveCfg = Release|Win32
@@ -30,8 +37,20 @@ Global
 		{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}.Debug|Win32.Build.0 = Debug|Win32
 		{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}.Release|Win32.ActiveCfg = Release|Win32
 		{BCF2CB2A-6ED3-46CF-BD1A-E1093B87689E}.Release|Win32.Build.0 = Release|Win32
+		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Debug|Win32.Build.0 = Debug|Win32
+		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Release|Win32.ActiveCfg = Release|Win32
+		{1C84960C-C82F-49C0-814D-7D142EBD7423}.Release|Win32.Build.0 = Release|Win32
+		{A20C96E6-F91D-4392-87ED-27264C48B71B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A20C96E6-F91D-4392-87ED-27264C48B71B}.Debug|Win32.Build.0 = Debug|Win32
+		{A20C96E6-F91D-4392-87ED-27264C48B71B}.Release|Win32.ActiveCfg = Release|Win32
+		{A20C96E6-F91D-4392-87ED-27264C48B71B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1C84960C-C82F-49C0-814D-7D142EBD7423} = {03EFC39B-0E1D-42A7-BD93-C2E15EF166C0}
+		{A20C96E6-F91D-4392-87ED-27264C48B71B} = {03EFC39B-0E1D-42A7-BD93-C2E15EF166C0}
 	EndGlobalSection
 EndGlobal
