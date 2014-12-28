@@ -34,3 +34,4 @@ test/*/Debug/*
 test/*/Release/*
 vcproj/Debug/*
 vcproj/Release/*
+vcproj/*.user
