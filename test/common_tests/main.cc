@@ -1,9 +1,11 @@
 #include <iostream>
 
 #define TEST(libname) do {\
-    bool libname##_tests();\
-    std::cout << ">>>> Testing " << #libname << " ...\n"; \
-    std::cout << (libname##_tests() ? "PASSED" : "**** FAILED ****") << '\n';} while (false)
+    int libname##_tests(); int n = libname##_tests(); \
+    std::cout << ">>>> Testing " << #libname << " ... "; \
+    if (n){ std::cout << "FAILED at case#" << n << " ****\n";}\
+        else { std::cout << "PASSED\n"; }\
+    } while (false)
 
 
 int main(int argc, char* argv[]) {
