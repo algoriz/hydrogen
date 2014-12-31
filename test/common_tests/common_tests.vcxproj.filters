@@ -18,4 +18,9 @@
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

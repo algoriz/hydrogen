@@ -142,25 +142,24 @@ namespace hy {
             return a < b ? string(a, b) : string();
         }
 
-        /* Find the position of ch in the string. */
+        /* Find the position of the first occurrence of ch in the string.
+         * If ch is not found in string, npos is returned.
+         */
         size_t find(char ch) const {
             const char* p = std::find(_str, _end, ch);
-            return p == _end ? (size_t)-1 : p - _str;
+            return p == _end ? npos : p - _str;
         }
 
-        /* Search string for str[0:count]. */
-        size_t search(const char* str, size_t count = -1) const {
-            if (-1 == count){
-                count = strlen(str);
-            }
-            const char* p = std::search(_str, _end, str, str + count);
-            return p == _end ? (size_t)-1 : p - _str;
-        }
-
-        /* Search string for str. */
+        /* Search string for the first occurrence of str.
+         * If str is not found in string, npos is returned.
+         */
         size_t search(const string& str) const {
             const char* p = std::search(_str, _end, str._str, str._end);
-            return p == _end ? (size_t)-1 : p - _str;
+            return p == _end ? npos : p - _str;
+        }
+
+        bool contains(const string& str) const {
+            return search(str) != npos;
         }
 
         /* Compare this string to str. */
@@ -431,6 +430,8 @@ namespace hy {
             return substr(start, stop);
         }
 
+        static const size_t npos = (size_t)-1;
+
     private:
         string(const char* str, const char* end): _str(str), _end(end) {}
         
@@ -440,16 +441,10 @@ namespace hy {
         }
 
         const char* _sub_checked(int n) const {
-            const char* p = nullptr;
-            if (n > 0){
-                p = _str + n;
-                if (p > _end){ p = _end; }
+            if (n >= 0){
+                return (unsigned)n < length() ? _str + n : _end;
             }
-            else {
-                p = _end + n;
-                if (p < _str){ p = _str; }
-            }
-            return p;
+            return (unsigned)-n < length() ? _end + n : _str;
         }
 
         void _assign_checked(const char* str, const char* end){

@@ -87,6 +87,9 @@
       <FileType>CppHeader</FileType>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
