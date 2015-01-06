@@ -1,4 +1,5 @@
 #include <hydrogen/nio/protocols.h>
+#include <hydrogen/common/string.h>
 
 using namespace hy;
 
@@ -24,6 +25,31 @@ endpoint::endpoint(){
 }
 
 endpoint::endpoint(const char* host, int port){
+    _setendpoint(host, port);
+}
+
+endpoint::endpoint(const char* uname){
+    auto part = string(uname).trim().split_n<2>(':');
+    if (part[0].empty() || part[0].length() > 127 || part[1].empty()){
+        throw io_exception("Bad address string.");
+    }
+
+    char host[128];
+    _setendpoint(part[0].copy(host), part[1].to_int());
+}
+
+std::string endpoint::name() const {
+    char buf[128];
+    struct {
+        unsigned char b1, b2, b3, b4;
+    } addr;
+    memcpy(&addr, &(_addr.sin_addr), sizeof(addr));
+    sprintf(buf, "%d.%d.%d.%d:%d", addr.b1, addr.b2, addr.b3, addr.b4,
+            (int)ntohs(_addr.sin_port));
+    return buf;
+}
+
+void hy::endpoint::_setendpoint(const char* host, int port){
     memset(&_addr, 0, sizeof(_addr));
 
     hostent* ent = gethostbyname(host);
@@ -33,41 +59,6 @@ endpoint::endpoint(const char* host, int port){
         _addr.sin_port = htons(port);
     }
     else {
-        throw host_not_found(host);
+        throw io_exception("Host not found");
     }
-}
-
-endpoint endpoint::from_uname(const char* uname){
-    char schema[8] = "tcp://";
-    const size_t schema_len = 6;
-
-    bool bad_schema = false;
-    for (size_t i = 0; i < schema_len; ++i){
-        if (tolower(uname[i]) != schema[i]){
-            bad_schema = true;
-            break;
-        }
-    }
-
-    if (!bad_schema){
-        uname += 6;
-        if (const char* p = strchr(uname, ':')){
-            std::string host(uname, p - uname);
-            ++p;
-            return endpoint(host.c_str(), atoi(p));
-        }
-    }
-
-    throw exception(hy::strcat("Invalid uniform address string: ", uname).c_str());
-}
-
-std::string endpoint::to_uname() const {
-    char buf[128];
-    struct {
-        unsigned char b1, b2, b3, b4;
-    } addr;
-    memcpy(&addr, &(_addr.sin_addr), sizeof(addr));
-    sprintf(buf, "tcp://%d.%d.%d.%d:%d", addr.b1, addr.b2, addr.b3, addr.b4,
-            (int)ntohs(_addr.sin_port));
-    return buf;
 }

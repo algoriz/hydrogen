@@ -39,14 +39,14 @@ void stream_socket::write(const char* buf, size_t len, int flag){
 
 size_t stream_socket::read_some(char* buf, size_t len, int flag){
     //if (!can_read()){
-    //    throw socket_exception("socket is not readable.", 0);
+    //    throw io_exception("socket is not readable.", 0);
     //}
     int rd = ::recv(native_handle(), buf, len, flag);
     if (rd <= 0){
         /* socket no longer readable */
         _rwmask &= ~readable;
         if (rd < 0){
-            throw socket_exception(socket_error::last());
+            throw io_exception("socket read error");
         }
     }
     _bytes_in += rd;
@@ -55,13 +55,13 @@ size_t stream_socket::read_some(char* buf, size_t len, int flag){
 
 size_t stream_socket::write_some(const char* buf, size_t len, int flag) {
     //if (!can_write()){
-    //    throw socket_exception("socket is not writable.", 0);
+    //    throw io_exception("socket is not writable.", 0);
     //}
     int wr = ::send(native_handle(), buf, len, flag);
     if (wr <= 0){
-        /* socket no longer readable */
+        /* socket no longer writable */
         _rwmask &= ~writable;
-        throw socket_exception(socket_error::last());
+        throw io_exception("socket write error");
     }
     _bytes_out += wr;
     return wr;

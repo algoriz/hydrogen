@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <hydrogen/nio/exceptions.h>
-#include <hydrogen/common/stdhelp.h>
+#include <hydrogen/common/stdext.h>
 
 #ifdef WIN32
 /* Windows socket headers */
@@ -23,21 +23,19 @@ namespace hy{
     public:
         endpoint();
         endpoint(const char* host, int port);
+        explicit endpoint(const char* name);
 
         /* Test whether the endpoint is invalid */
         bool bad() const {
             return _addr.sin_port == 0;
         }
 
-        sockaddr_in getaddr() const {
+        const sockaddr_in& getaddr() const {
             return _addr;
         }
 
-        /* Converts to uniform address */
-        std::string to_uname() const;
-
-        /* Parses a uniform address. format = tcp://<host>:<port> */
-        static endpoint from_uname(const char* uname);
+        /* Name of the endpoint in <host>:<port> format. */
+        std::string name() const;
 
         /* endpoint bind to 127.0.0.1 */
         static endpoint localhost(int port){
@@ -50,6 +48,8 @@ namespace hy{
         }
 
     private:
+        void _setendpoint(const char* host, int port);
+
         sockaddr_in _addr;
     };
 
@@ -109,12 +109,12 @@ namespace hy{
         }
 
         /* Creates a new socket.
-         * Throws a socket_exception if the creation fails.
+         * Throws an io_exception if the creation fails.
          */
         static socket_base new_socket() {
             socket_base sock;
             if ((sock._fd = proto::create()) == proto::badfd){
-                throw socket_exception(socket_error::last());
+                throw io_exception("failed to create a socket");
             }
             return std::move(sock);
         }

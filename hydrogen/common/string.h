@@ -1,7 +1,8 @@
 #pragma once
-#include <string>
 #include <cassert>
+#include <cstdarg>
 #include <cstdlib>
+#include <string>
 #include <vector>
 #include <array>
 #include <algorithm>
@@ -19,11 +20,17 @@ namespace hy {
         /* empty string */
         string() : _str(_zeros()), _end(_zeros()) {}
 
-        /* Wraps the initial count characters of str as a string. */
-        string(const char* str, size_t count = -1){ wrap(str, count); }
+        /* Wraps the initial count characters of str. */
+        string(char* str, size_t count = -1){ wrap(str, count); }
+        string(const char* str, size_t count = -1){ wrap_const(str, count); }
+
+        /* Wraps characters in range [beg, end). Requires beg < end. */
+        string(char* beg, char* end) : _str(beg), _end(end) {
+            assert(beg <= end);
+        }
 
         /* Reset the wrapped buffer to the initial count characters of str. */
-        string& wrap(const char* str, size_t count = -1){
+        string& wrap(char* str, size_t count = -1){
             assert(str != nullptr);
             _str = str;
             if (count == -1){
@@ -33,17 +40,22 @@ namespace hy {
             return *this;
         }
 
-        /* Make the string buffer null terminated. */
+        /* Wraps a const C-style string. */
+        string& wrap_const(const char* str, size_t count = -1){
+            return wrap(const_cast<char*>(str), count);
+        }
+
+        /* Make the string null terminated. */
         string& make_cstr(){
             if (_end != _zeros()){
-                *const_cast<char*>(_end) = 0;
+                *_end = 0;
             }
             return *this;
         }
 
         /* Make characters to lower case. */
         string& make_lower(){
-            for (char* p = begin(); p != _end; ++p){
+            for (char* p = _str; p != _end; ++p){
                 *p = tolower(*p);
             }
             return *this;
@@ -51,7 +63,7 @@ namespace hy {
 
         /* Make characters to upper case. */
         string& make_upper(){
-            for (char* p = begin(); p != _end; ++p){
+            for (char* p = _str; p != _end; ++p){
                 *p = toupper(*p);
             }
             return *this;
@@ -115,30 +127,27 @@ namespace hy {
         }
 
         /* Get the string buffer which MAY NOT be null terminated. */
-        const char* buffer() const { return _str; }
+        char* buffer() const { return _str; }
 
         /* iterators */
-        char* begin() const { return const_cast<char*>(_str); }
-        char* end() const { return const_cast<char*>(_end); }
+        char* begin() const { return _str; }
+        char* end() const { return _end; }
         const char* cbegin() const { return _str; }
         const char* cend() const { return _end; }
 
         /* Backward iterators */
-        char* rbegin() const { return const_cast<char*>(_end - 1); }
-        char* rend() const { return const_cast<char*>(_str - 1); }
+        char* rbegin() const { return _end - 1; }
+        char* rend() const { return _str - 1; }
         const char* crbegin() const { return _end - 1; }
         const char* crend() const { return _str - 1; }
 
         /* Get substring[start : stop]
          * Both start and stop can be negative. A negative value indicates that
          * the position is counted backward starting from the end of the string.
-         * 
-         * string("abc").substr(0, -1) == "ab";
-         * string("abc").substr(-1) == "c";
          */
         string substr(int start = 0, int stop = INT_MAX) const {
-            const char* a = _sub_checked(start);
-            const char* b = _sub_checked(stop);
+            char* a = _sub_checked(start);
+            char* b = _sub_checked(stop);
             return a < b ? string(a, b) : string();
         }
 
@@ -248,8 +257,8 @@ namespace hy {
          * of actual splits.
          */
         std::vector<string>& split(char sep, std::vector<string>& subs, size_t maxsplits = -1) const {
-            const char* a = _str;
-            const char* b = a;
+            char* a = _str;
+            char* b = a;
             for (; b < _end; ++b){
                 if (*b == sep){
                     if (!--maxsplits){
@@ -271,8 +280,8 @@ namespace hy {
             assert(!sep.empty());
 
             size_t seplen = sep.length();
-            const char* a = _str;
-            const char* b = a;
+            char* a = _str;
+            char* b = a;
             while (b < _end){
                 b = std::search(a, _end, sep._str, sep._end);
                 if (b != _end){
@@ -298,9 +307,9 @@ namespace hy {
             return split(sep, subs, maxsplits);
         }
 
-        /* Splits the string into Key-Value pair(Requires separator string is not empty). */
+        /* Splits the string into Key-Value pair. */
         std::pair<string, string>& split_kv(char sep, std::pair<string, string>& kv) const {
-            const char* p = _str;
+            char* p = _str;
             while (p < _end && *p != sep){
                 ++p;
             }
@@ -310,7 +319,7 @@ namespace hy {
         }
 
         std::pair<string, string>& split_kv(const string& sep, std::pair<string, string>& kv) const {
-            const char* p = std::search(_str, _end, sep._str, sep._end);
+            char* p = std::search(_str, _end, sep._str, sep._end);
             kv.first._assign_checked(_str, p);
             kv.second._assign_checked(p + sep.length(), _end);
             return kv;
@@ -331,8 +340,8 @@ namespace hy {
         std::array<string, N>& split_n(char sep, std::array<string, N>& parts) const {
             assert(N > 0);
 
-            const char* a = _str;
-            const char* b = a;
+            char* a = _str;
+            char* b = a;
             size_t n = 0;
             for (; b < _end; ++b){
                 if (*b == sep){
@@ -358,8 +367,8 @@ namespace hy {
         std::array<string, N>& split_n(const string& sep, std::array<string, N>& parts) const {
             assert(N > 0);
 
-            const char* a = _str;
-            const char* b = a;
+            char* a = _str;
+            char* b = a;
             size_t n = 0;
             size_t seplen = sep.length();
             while (b < _end){
@@ -398,7 +407,7 @@ namespace hy {
 
         /* Gets the integer value represented by the string. */
         int to_int() const {
-            if (*_end == 0 || *_end == ' ' || *_end == '\t'){
+            if (*_end < '0' || *_end > '9'){
                 return atoi(_str);
             }
 
@@ -408,7 +417,7 @@ namespace hy {
 
         /* Gets the double value represented by the string. */
         double to_double() const {
-            if (*_end == 0 || *_end == ' ' || *_end == '\t'){
+            if (*_end < '0' || *_end > '9'){
                 return atof(_str);
             }
 
@@ -416,9 +425,19 @@ namespace hy {
             return atof(ncopy(d, 16));
         }
 
+        /* Gets the long long value represented by the string. */
+        long long to_longlong() const {
+            if (*_end < '0' || *_end > '9'){
+                return atoll(_str);
+            }
+
+            char d[64];
+            return atoll(ncopy(d, 64));
+        }
+
         /* Random access without checking. */
         const char& operator[](size_t i) const { return _str[i]; }
-        char& operator[](size_t i) { return const_cast<char*>(_str)[i]; }
+        char& operator[](size_t i) { return _str[i]; }
 
         bool operator==(const char* str) const { return equals(str); }
         bool operator==(const string& str) const { return equals(str); }
@@ -432,22 +451,20 @@ namespace hy {
 
         static const size_t npos = (size_t)-1;
 
-    private:
-        string(const char* str, const char* end): _str(str), _end(end) {}
-        
-        void _assign(const char* str, const char* end){
-            _str = str;
-            _end = end;
-        }
-
-        const char* _sub_checked(int n) const {
+    private:        
+        char* _sub_checked(int n) const {
             if (n >= 0){
                 return (unsigned)n < length() ? _str + n : _end;
             }
             return (unsigned)-n < length() ? _end + n : _str;
         }
 
-        void _assign_checked(const char* str, const char* end){
+        void _assign(char* str, char* end){
+            _str = str;
+            _end = end;
+        }
+
+        void _assign_checked(char* str, char* end){
             if (end <= str){
                 _end = _str = _zeros();
             }
@@ -458,13 +475,13 @@ namespace hy {
         }
 
         /* Buffer for an empty string */
-        static const char* _zeros() {
+        static char* _zeros() {
             static int d = 0;
-            return reinterpret_cast<const char*>(&d);
+            return reinterpret_cast<char*>(&d);
         }
 
-        const char* _str;
-        const char* _end;
+        char* _str;
+        char* _end;
     };
 
     inline std::ostream& operator<< (std::ostream& out, const string& str){
@@ -476,9 +493,11 @@ namespace hy {
     inline bool operator< (const string& left, const string& right){
         return left.compare(right) < 0;
     }
+
     inline bool operator< (const string& left, const char* right){
         return left.compare(right) < 0;
     }
+
     inline bool operator< (const char* left, const string& right){
         return right.compare(left) < 0;
     }

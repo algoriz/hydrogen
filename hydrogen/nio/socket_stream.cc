@@ -66,7 +66,7 @@ void socket_stream::open(const endpoint& ep){
     tcp_socket s = tcp_socket::new_socket();
     auto addr = ep.getaddr();
     if (::connect(s.native_handle(), (sockaddr*)&addr, sizeof(addr))){
-        throw socket_exception(socket_error::last());
+        throw io_exception("socket connect error");
     }
 
     auto tmp = stream_socket(std::move(s),
@@ -75,7 +75,7 @@ void socket_stream::open(const endpoint& ep){
 }
 
 void socket_stream::open(const char* uname){
-    open(endpoint::from_uname(uname));
+    open(endpoint(uname));
 }
 
 void socket_stream::getline(char* dst, size_t count, char delim){

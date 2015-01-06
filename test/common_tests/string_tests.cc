@@ -83,6 +83,57 @@ void string_tests() {
     }
     END_TEST_CASE();
 
+    BEGIN_TEST_CASE("to_int/to_double/to_longlong");
+    {
+        auto strs = string(" |0|-1|123|-1234| 10 | -10 | 777a").split('|');
+        int  values[] = { 0, 0, -1, 123, -1234, 10, -10, 777 };
+        size_t n = strs.size();
+        for (size_t i = 0; i < n; ++i){
+            TEST_CHECK(strs[i].to_int() == values[i]);
+        }
+    }
+
+    {
+        auto strs = string(" |0|-1|123.1|-1234.333|     10.66666666666666 | -10 | 777.001a").split('|');
+        double values[] = { 0, 0, -1, 123.1, -1234.333, 10.66666666666666, -10, 777.001 };
+        size_t n = strs.size();
+        for (size_t i = 0; i < n; ++i){
+            TEST_AEQUAL(strs[i].to_double(), values[i], 0.00000000000001);
+        }
+    }
+
+    {
+        auto strs = string(" |0|-1|123|-1234| 10 | -10 | 777a | 1234567890123456").split('|');
+        long long  values[] = { 0, 0, -1, 123, -1234, 10, -10, 777, 1234567890123456 };
+        size_t n = strs.size();
+        for (size_t i = 0; i < n; ++i){
+            TEST_CHECK(strs[i].to_longlong() == values[i]);
+        }
+    }
+    END_TEST_CASE();
+
+    //BEGIN_TEST_CASE("string_builder");
+    //{
+    //    char buf[1024];
+    //    string_builder builder(buf, 1024);
+    //    TEST_CHECK(builder.append(10).to_string().to_int() == 10);
+    //    builder.clear();
+    //    TEST_CHECK(builder.append(-1).to_string().to_int() == -1);
+    //    builder.clear();
+    //    TEST_CHECK(builder.append(123456789).to_string().to_int() == 123456789);
+    //    builder.clear();
+    //    TEST_CHECK(builder.append(123456789123456).to_string().to_longlong() == 123456789123456);
+    //    builder.clear();
+    //    TEST_CHECK(builder.append_format("hello").to_string() == "hello");
+    //    TEST_CHECK(builder.append_format("").to_string() == "hello");
+    //    TEST_CHECK(builder.append("").to_string() == "hello");
+    //    TEST_CHECK(builder.append(" world").to_string() == "hello world");
+    //    TEST_CHECK(builder.append(' ').to_string() == "hello world ");
+    //    TEST_CHECK(builder.append(false).to_string() == "hello world false");
+    //    TEST_CHECK(builder.append(' ').to_string() == "hello world false ");
+    //    TEST_CHECK(builder.append(123456).to_string() == "hello world false 123456");
+    //    builder.clear();
+    //}
+    //END_TEST_CASE();
     END_TEST_PACKAGE();
 }
-

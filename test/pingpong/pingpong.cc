@@ -28,7 +28,7 @@ public:
                 _client.write(buf, size);
             }
         }
-        catch (hy::socket_exception e){
+        catch (hy::io_exception e){
             std::cerr << "EchoServerClient exception out: " << e.what() << '\n';
         }
 
@@ -49,7 +49,7 @@ public:
             c.run();
         }
     }
-    catch (hy::socket_exception e) {
+    catch (hy::io_exception e) {
         std::cerr << "EchoServer exception: " << e.what() << '\n';
     }
     catch (...){
@@ -93,7 +93,7 @@ public:
         std::cout << "IO time: " << tm.count() << '\n';
         std::cout << "PingpongTest send: " << stream.tellg() << ", recv: " << stream.tellp() << '\n';
     }
-    catch (hy::socket_exception e){
+    catch (hy::io_exception e){
         std::cerr << "PingpongTest exception out, " << e.what() << '\n';
     }
 
@@ -145,7 +145,7 @@ public:
         s.getline(buf, 5004);
         validate(l5000 == buf, "LineByLineTest #5");
     }
-    catch (hy::socket_exception e){
+    catch (hy::io_exception e){
         std::cerr << "LineByLineTest exception out, " << e.what() << '\n';
     }
 

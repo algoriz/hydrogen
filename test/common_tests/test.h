@@ -22,6 +22,15 @@ do {  const char* _hydrogen_test_package_name = package_name;\
       }
 
 
+#define TEST_AEQUAL(expr, value, a)\
+      while (_hydrogen_test_continue && abs(expr-value) > a){\
+        std::cout << "FAILED Case " << _hydrogen_test_case_name \
+        << ", Source expression: " << #expr << " ~= " << #a << '\n'; \
+        _hydrogen_test_failed = true; \
+        break; \
+      }
+
+
 #define TEST_ASSERT(expr)\
       while (_hydrogen_test_continue && !(expr)){\
         std::cout << "**** FATAL ERROR Case " << _hydrogen_test_case_name \

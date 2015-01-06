@@ -3,7 +3,7 @@
 
 namespace hy{
     /*
-     * stream_socket represents a TCP socket object for blocked/synchronized IO.
+     * stream_socket represents a TCP socket for blocked/synchronized IO.
      */
     class stream_socket : public tcp_socket {
     public:
@@ -18,24 +18,24 @@ namespace hy{
         stream_socket& operator= (stream_socket&& s);
 
         /* Read some bytes from the socket, returns number of bytes actually read.
-         * If the read operation failed, this method throws a socket_exception.
+         * If the read operation failed, this method throws an io_exception.
          */
         size_t read_some(char* buf, size_t len, int flag = 0);
 
         /* Write some bytes into the socket, returns number of bytes actually written.
-         * If the write operation failed, this method throws a socket_exception.
+         * If the write operation failed, this method throws an io_exception.
          */
         size_t write_some(const char* buf, size_t len, int flag = 0);
 
         /* Read specified number of bytes from the socket.
          * If the connection is closed or an error occurs before the specified bytes
-         * are read, this method throws a socket_exception.
+         * are read, this method throws an io_exception.
          */
         void read(char* buf, size_t len, int flag = 0);
 
         /* Write specified number of bytes into the socket.
          * If the connection is closed or an error occurs before the specified bytes
-         * are written, this method throws a socket_exception.
+         * are written, this method throws an io_exception.
          */
         void write(const char* buf, size_t len, int flag = 0);
 

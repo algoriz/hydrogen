@@ -25,7 +25,8 @@ socket_acceptor& socket_acceptor::operator=(socket_acceptor&& a){
 void socket_acceptor::bind(const endpoint& ep) {
     auto addr = ep.getaddr();
     if (::bind(native_handle(), (sockaddr*)&addr, sizeof(addr))) {
-        throw socket_exception(socket_error::last());
+        std::string message = "bind error";
+        message += ep.name();
     }
     _name = ep;
 }
@@ -41,7 +42,7 @@ void socket_acceptor::listen(const endpoint& ep, int backlog) {
 
 void socket_acceptor::listen(int backlog) {
     if (::listen(native_handle(), backlog)) {
-        throw socket_exception(socket_error::last());
+        throw io_exception("socket listen error");
     }
 }
 
@@ -50,7 +51,7 @@ stream_socket socket_acceptor::accept() {
     socklen_t len = sizeof(addr);
     int fd = ::accept(native_handle(), reinterpret_cast<sockaddr*>(&addr), &len);
     if (fd == proto::badfd) {
-        throw socket_exception(socket_error::last());
+        throw io_exception("socket accept error");
     }
     return stream_socket(
         tcp_socket(fd), stream_socket::readable | stream_socket::writable);

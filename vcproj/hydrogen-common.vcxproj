@@ -12,9 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\hydrogen\common\queue_buffer.h" />
-    <ClInclude Include="..\hydrogen\common\stdhelp.h" />
+    <ClInclude Include="..\hydrogen\common\stdext.h" />
     <ClInclude Include="..\hydrogen\common\string.h" />
-    <ClInclude Include="..\hydrogen\common\varadic.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{77914976-0EE0-4FCF-88F8-EA257CBF55EF}</ProjectGuid>
@@ -58,6 +57,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -73,6 +73,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

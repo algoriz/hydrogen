@@ -1,8 +1,10 @@
 #pragma once
 #include <stdexcept>
+#include <cstdarg>
 #include <cassert>
-#include <hydrogen/common/varadic.h>
 #include <cerrno>
+
+#include <hydrogen/common/stdext.h>
 
 namespace hy {
     /* Network IO specific error codes */
@@ -21,6 +23,7 @@ namespace hy {
         static int last();
     };
 
+    /* Base exception */
     class exception {
     public:
         exception(const char* message = nullptr){
@@ -29,37 +32,23 @@ namespace hy {
             }
         }
 
+        exception(const std::string& message): _message(message){}
+        exception(std::string&& message) : _message(std::move(message)){}
+        exception(exception&& ex): _message(std::move(ex._message)){}
+
         const std::string& what() const { return _message; }
     
     private:
         std::string _message;
     };
 
-    class host_not_found : public exception {
+    /* IO related exception */
+    class io_exception : public exception {
     public:
-        host_not_found(const char* host = nullptr)
-            : exception("hy::host_not_found"){
-            if (host){
-                _host = host;
-            }
-        }
-
-        const std::string& host() { return _host; }
-
-    private:
-        std::string _host;
+        io_exception(const char* message = nullptr) : exception(message){}
+        io_exception(const std::string& message) : exception(message){}
+        io_exception(std::string&& message) : exception(std::move(message)){}
+        io_exception(io_exception&& ex) : exception(std::move(ex)){}
     };
 
-    class socket_exception : public exception {
-    public:
-        socket_exception(int error = socket_error::success)
-            : exception("hy::socket_exception"), _error(error){}
-
-        int error_code() const {
-            return _error;
-        }
-
-    private:
-        int _error;
-    };
 }

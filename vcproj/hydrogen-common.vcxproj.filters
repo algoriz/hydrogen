@@ -11,16 +11,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\hydrogen\common\stdhelp.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hydrogen\common\varadic.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\hydrogen\common\queue_buffer.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\hydrogen\common\string.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hydrogen\common\stdext.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
