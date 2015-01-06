@@ -146,8 +146,8 @@ namespace hy {
          * the position is counted backward starting from the end of the string.
          */
         string substr(int start = 0, int stop = INT_MAX) const {
-            char* a = _sub_checked(start);
-            char* b = _sub_checked(stop);
+            char* a = _offset(start);
+            char* b = _offset(stop);
             return a < b ? string(a, b) : string();
         }
 
@@ -439,11 +439,6 @@ namespace hy {
         const char& operator[](size_t i) const { return _str[i]; }
         char& operator[](size_t i) { return _str[i]; }
 
-        bool operator==(const char* str) const { return equals(str); }
-        bool operator==(const string& str) const { return equals(str); }
-        bool operator!=(const char* str) const { return !equals(str); }
-        bool operator!=(const string& str) const { return !equals(str); }
-
         /* Substring operator. Returns substring[start : stop] */
         string operator()(int start = 0, int stop = INT_MAX) const {
             return substr(start, stop);
@@ -452,7 +447,7 @@ namespace hy {
         static const size_t npos = (size_t)-1;
 
     private:        
-        char* _sub_checked(int n) const {
+        char* _offset(int n) const {
             if (n >= 0){
                 return (unsigned)n < length() ? _str + n : _end;
             }
@@ -484,9 +479,28 @@ namespace hy {
         char* _end;
     };
 
-    inline std::ostream& operator<< (std::ostream& out, const string& str){
-        out.write(str.buffer(), str.length());
-        return out;
+    inline bool operator== (const string& left, const string& right){
+        return left.equals(right);
+    }
+
+    inline bool operator== (const string& left, const char* right){
+        return left.equals(right);
+    }
+
+    inline bool operator== (const char* left, const string& right){
+        return right.equals(left);
+    }
+
+    inline bool operator!= (const string& left, const string& right){
+        return !left.equals(right);
+    }
+
+    inline bool operator!= (const string& left, const char* right){
+        return !left.equals(right);
+    }
+
+    inline bool operator!= (const char* left, const string& right){
+        return !right.equals(left);
     }
 
     /* Ordering */
@@ -500,5 +514,10 @@ namespace hy {
 
     inline bool operator< (const char* left, const string& right){
         return right.compare(left) < 0;
+    }
+
+    inline std::ostream& operator<< (std::ostream& out, const string& str){
+        out.write(str.buffer(), str.length());
+        return out;
     }
 }
