@@ -8,80 +8,54 @@
 #include <algorithm>
 
 namespace hy {
-    /* hy::string is a wrapper over C-style string(char array), it provides a
-     * write restricted std::string-like interface.
-     * 
-     * The most notable difference between hy::string and std::string is that
-     * hy::string doesn't has built-in memory management. Any string operation
-     * that will induce or possibly induce memory growth is not supported.
+    class string;
+    typedef std::vector<string> strings;
+    typedef std::pair<string, string> keyval;
+
+    /* hy::string is a lightweight C-style string wrapper.
+     * The contents held by hy::string is immutable.
      */
     class string {
     public:
-        /* empty string */
-        string() : _str(_zeros()), _end(_zeros()) {}
+        /* "Not a Position" indicator */
+        static const size_t npos = (size_t)-1;
 
-        /* Wraps the initial count characters of str. */
-        string(char* str, size_t count = -1){ wrap(str, count); }
-        string(const char* str, size_t count = -1){ wrap_const(str, count); }
+    public:
+        /* Wraps an empty string */
+        string()
+            :_str(reinterpret_cast<const char*>(&_zero)),
+            _end(reinterpret_cast<const char*>(&_zero)){}
 
-        /* Wraps characters in range [beg, end). Requires beg < end. */
-        string(char* beg, char* end) : _str(beg), _end(end) {
-            assert(beg <= end);
-        }
+        /* Wraps string str */
+        string(const char* str)
+            : _str(str), _end(str + strlen(str)){}
 
-        /* Reset the wrapped buffer to the initial count characters of str. */
-        string& wrap(char* str, size_t count = -1){
-            assert(str != nullptr);
-            _str = str;
-            if (count == -1){
-                count = strlen(str);
-            }
-            _end = _str + count;
-            return *this;
-        }
+        /* Wraps initial count characters of string str */
+        string(const char* str, size_t count)
+            : _str(str), _end(str + count){}
 
-        /* Wraps a const C-style string. */
-        string& wrap_const(const char* str, size_t count = -1){
-            return wrap(const_cast<char*>(str), count);
-        }
+        /* Wraps characters [beg : end] */
+        string(const char* beg, const char* end)
+            : _str(beg), _end(end) { assert(beg <= end); }
 
-        /* Make the string null terminated. */
-        string& make_cstr(){
-            if (_end != _zeros()){
-                *_end = 0;
-            }
-            return *this;
-        }
+        /* Length of the string. */
+        size_t length() const { return _end - _str; }
 
-        /* Make characters to lower case. */
-        string& make_lower(){
-            for (char* p = _str; p != _end; ++p){
-                *p = tolower(*p);
-            }
-            return *this;
-        }
+        /* Test whether the string is empty. */
+        bool empty() const { return _end == _str; }
 
-        /* Make characters to upper case. */
-        string& make_upper(){
-            for (char* p = _str; p != _end; ++p){
-                *p = toupper(*p);
-            }
-            return *this;
-        }
+        /* Make this string empty. */
+        void clear() { _str = _end = reinterpret_cast<const char*>(&_zero); }
 
         /* Remove leading spaces. */
         string& ltrim() {
-            while (_str < _end && isspace(*_str)) {
-                ++_str;
-            }
+            while (_str < _end && isspace(*_str)) { ++_str; }
             return *this;
         }
 
         /* Remove trailing spaces. */
         string& rtrim() {
-            while (_end > _str && isspace(_end[-1])) {
-                --_end;
-            }
+            while (_end > _str && isspace(_end[-1])) { --_end; }
             return *this;
         }
 
@@ -90,64 +64,53 @@ namespace hy {
             return ltrim().rtrim();
         }
 
-        /* Remove n characters at back. */
+        /* Remove at most n characters at back. */
         string& pop_back(size_t n){
-            if (n > length()){
-                clear();
-            }
-            else {
+            if (_end - n > _str){
                 _end -= n;
             }
-            return *this;
-        }
-
-        /* Remove n characters at front. */
-        string& pop_front(size_t n){
-            if (n > length()){
+            else {
                 clear();
             }
-            else {
-                _str += n;
-            }
             return *this;
         }
 
-        /* Make this string empty. */
-        void clear() { _str = _end = _zeros(); }
-
-        /* Length of the string. */
-        size_t length() const { return _end - _str; }
-
-        /* Test whether the string is empty. */
-        bool empty() const { return _end == _str; }
+        /* Remove at most n characters at front. */
+        string& pop_front(size_t n){
+            if (_str + n < _end){
+                _str += n;
+            }
+            else {
+                clear();
+            }
+            return *this;
+        }
 
         /* Converts to std::string */
         std::string std_string() const {
             return std::string(_str, length());
         }
 
-        /* Get the string buffer which MAY NOT be null terminated. */
-        char* buffer() const { return _str; }
+        /* Get the string buffer.
+         * Note that the string buffer MAY NOT be null terminated.
+         */
+        const char* buffer() const { return _str; }
 
-        /* iterators */
-        char* begin() const { return _str; }
-        char* end() const { return _end; }
-        const char* cbegin() const { return _str; }
-        const char* cend() const { return _end; }
+        /* Forward iterators */
+        const char* begin() const { return _str; }
+        const char* end() const { return _end; }
 
         /* Backward iterators */
-        char* rbegin() const { return _end - 1; }
-        char* rend() const { return _str - 1; }
-        const char* crbegin() const { return _end - 1; }
-        const char* crend() const { return _str - 1; }
+        const char* rbegin() const { return _end - 1; }
+        const char* rend() const { return _str - 1; }
 
         /* Get substring[start : stop]
          * Both start and stop can be negative. A negative value indicates that
          * the position is counted backward starting from the end of the string.
          */
         string substr(int start = 0, int stop = INT_MAX) const {
-            char* a = _offset(start);
-            char* b = _offset(stop);
+            auto a = _offset(start);
+            auto b = _offset(stop);
             return a < b ? string(a, b) : string();
         }
 
@@ -155,7 +118,7 @@ namespace hy {
          * If ch is not found in string, npos is returned.
          */
         size_t find(char ch) const {
-            const char* p = std::find(_str, _end, ch);
+            auto p = std::find(_str, _end, ch);
             return p == _end ? npos : p - _str;
         }
 
@@ -163,7 +126,7 @@ namespace hy {
          * If str is not found in string, npos is returned.
          */
         size_t search(const string& str) const {
-            const char* p = std::search(_str, _end, str._str, str._end);
+            auto p = std::search(_str, _end, str._str, str._end);
             return p == _end ? npos : p - _str;
         }
 
@@ -223,9 +186,9 @@ namespace hy {
                 && 0 == memcmp(_str, str._str, length());
         }
 
-        /* Copy the whole string to dst and returns dst.
-         * copy assumes that size of buffer dst is sufficient to store the whole
-         * string including a padding null character.
+        /* Copy the whole string to `dst` and returns `dst`.
+         * This method assumes that size of `dst` is sufficient to store the 
+         * whole string including the terminating null character.
          */
         char* copy(char* dst) const {
             size_t mylen = length();
@@ -234,11 +197,11 @@ namespace hy {
             return dst;
         }
 
-        /* Copy the initial count characters of the string to dst and returns dst.
-         * If count is less than the length of the string, a null character is
-         * not automatically appended to dst.
-         * If count is greater than the length of the string, dst is padded with
-         * null characters up to length count.
+        /* Copy initial `count` characters to `dst` and returns `dst`.
+         * If `count` is less than the length of the string, a null character is
+         * not automatically appended to `dst`.
+         * If `count` is greater than the length of the string, `dst` is padded
+         * with null characters up to length `count`.
          */
         char* ncopy(char* dst, size_t count) const {
             size_t mylen = length();
@@ -252,65 +215,150 @@ namespace hy {
             return dst;
         }
 
-        /* Splits the string into multiple substrings.
-         * Note that the number of substrings is always one more than the number
-         * of actual splits.
+        /* Splits the string into up to (`splits`+1) parts with `ch` as the separator.
+         * The split result will be appended to `parts`.
+         * Returns `parts`.
          */
-        std::vector<string>& split(char sep, std::vector<string>& subs, size_t maxsplits = -1) const {
-            char* a = _str;
-            char* b = a;
-            for (; b < _end; ++b){
-                if (*b == sep){
-                    if (!--maxsplits){
+        strings& split(strings& parts, char ch, size_t splits = -1) const {
+            auto a = _str, b = a;
+            while (b < _end){
+                if (*b == ch){
+                    parts.push_back(string(a, b));
+                    a = b + 1;
+                    if (--splits == 0){
+                        b = _end;
+                        break;
+                    }
+                }
+                ++b;
+            }
+
+            if (a != b){
+                parts.push_back(string(a, b));
+            }
+            return parts;
+        }
+
+        /* Splits the string into up to (`splits`+1) parts with `s` as the separator.
+         * The split result will be appended to `parts`.
+         * Returns `parts`.
+         */
+        strings& split(strings& parts, const string& s, size_t splits = -1) const {
+            _check_separator(s);
+
+            auto a = _str, b = a;
+            const size_t step = s.length();
+            while (b < _end){
+                b = std::search(a, _end, s._str, s._end);
+                if (b != _end){
+                    parts.push_back(string(a, b));
+                    b += step;
+                    a = b;
+                    if (--splits == 0){
                         b = _end;
                     }
-                    subs.push_back(string(a, b));
+                }
+            }
+
+            if (a != b){
+                parts.push_back(string(a, b));
+            }
+            return parts;
+        }
+
+        /* Splits the string into up to (`splits`+1) parts with `ch` as the separator. */
+        strings split(char ch, size_t splits = -1) const {
+            std::vector<string> parts;
+            return std::move(split(parts, ch, splits));
+        }
+        
+        /* Splits the string into up to (`splits`+1) parts with `s` as the separator. */
+        strings split(const string& s, size_t splits = -1) const {
+            std::vector<string> parts;
+            return std::move(split(parts, s, splits));
+        }
+
+        /* Splits the string into N (requires N > 0) parts with `ch` as the separator.
+         * The split result will be assigned to `parts`.
+         * Returns `parts`.
+         */
+        template<size_t N>
+        std::array<string, N>& split_n(char ch, std::array<string, N>& parts) const {
+            auto a = _str, b = a;
+            size_t n = 0;
+            for (; b < _end; ++b){
+                if (*b == ch){
+                    if (N == ++n){
+                        b = _end;
+                    }
+                    parts[n-1]._assign(a, b);
                     a = b + 1;
                 }
             }
 
             if (a != b){
-                subs.push_back(string(a, b));
+                parts[n]._assign(a, b);
+                ++n;
             }
-            return subs;
+            for (; n < N; ++n){
+                parts[n].clear();
+            }
+            return parts;
         }
         
-        std::vector<string>& split(const string& sep, std::vector<string>& subs, size_t maxsplits = -1) const {
-            /* Separator should not be empty */
-            assert(!sep.empty());
+        /* Splits the string into N (requires N > 0) parts with `s` as the separator.
+         * The split result will be assigned to `parts`.
+         * Returns `parts`.
+         */
+        template<size_t N>
+        std::array<string, N>& split_n(const string& s, std::array<string, N>& parts) const {
+            _check_separator(s);
 
-            size_t seplen = sep.length();
-            char* a = _str;
-            char* b = a;
+            auto a = _str, b = a;
+            size_t n = 0;
+            const size_t step = s.length();
             while (b < _end){
-                b = std::search(a, _end, sep._str, sep._end);
+                b = std::search(a, _end, s._str, s._end);
                 if (b != _end){
-                    subs.push_back(string(a, b));
-                    b += seplen;
+                    if (N == ++n){
+                        b = _end;
+                    }
+                    parts[n-1]._assign(a, b);
+                    b += step;
                     a = b;
                 }
             }
 
             if (a != b){
-                subs.push_back(string(a, b));
+                parts[n]._assign(a, b);
+                ++n;
             }
-            return subs;
+            for (; n < N; ++n){
+                parts[n].clear();
+            }
+            return parts;
         }
 
-        std::vector<string> split(char sep, size_t maxsplits = -1) const {
-            std::vector<string> subs;
-            return split(sep, subs, maxsplits);
+        /* Splits the string into N (requires N > 0) parts with `ch` as the separator. */
+        template<size_t N>
+        std::array<string, N> split_n(char ch) const {
+            std::array<string, N> parts;
+            return split_n(ch, parts);
+        }
+
+        /* Splits the string into N (requires N > 0) parts with `s` as the separator. */
+        template<size_t N>
+        std::array<string, N> split_n(const string& s) const {
+            std::array<string, N> parts;
+            return split_n(s, parts);
         }
         
-        std::vector<string> split(const string& sep, size_t maxsplits = -1) const {
-            std::vector<string> subs;
-            return split(sep, subs, maxsplits);
-        }
-
-        /* Splits the string into Key-Value pair. */
-        std::pair<string, string>& split_kv(char sep, std::pair<string, string>& kv) const {
-            char* p = _str;
-            while (p < _end && *p != sep){
+        /* Splits the string into key/val pair with `ch` as the separator.
+         * Returns `kv`.
+         */
+        keyval& split_kv(char ch, keyval& kv) const {
+            auto p = _str;
+            while (p < _end && *p != ch){
                 ++p;
             }
             kv.first._assign_checked(_str, p);
@@ -318,91 +366,28 @@ namespace hy {
             return kv;
         }
 
-        std::pair<string, string>& split_kv(const string& sep, std::pair<string, string>& kv) const {
-            char* p = std::search(_str, _end, sep._str, sep._end);
+        /* Splits the string into key/val pair with string `s` as the separator.
+         * Returns `kv`.
+         */
+        keyval& split_kv(const string& s, keyval& kv) const {
+            _check_separator(s);
+
+            auto p = std::search(_str, _end, s._str, s._end);
             kv.first._assign_checked(_str, p);
-            kv.second._assign_checked(p + sep.length(), _end);
+            kv.second._assign_checked(p + s.length(), _end);
             return kv;
         }
 
-        std::pair<string, string> split_kv(char sep) const {
+        /* Splits the string into key/val pair with `ch` as the separator. */
+        keyval split_kv(char ch) const {
             std::pair<string, string> kv;
-            return split_kv(sep, kv);
+            return split_kv(ch, kv);
         }
 
-        std::pair<string, string> split_kv(const string& sep) const {
+        /* Splits the string into key/val pair with `s` as the separator. */
+        keyval split_kv(const string& s) const {
             std::pair<string, string> kv;
-            return split_kv(sep, kv);
-        }
-
-        /* Splits the string into N parts(Requires N > 0). */
-        template<size_t N>
-        std::array<string, N>& split_n(char sep, std::array<string, N>& parts) const {
-            assert(N > 0);
-
-            char* a = _str;
-            char* b = a;
-            size_t n = 0;
-            for (; b < _end; ++b){
-                if (*b == sep){
-                    if (N == ++n){
-                        b = _end;
-                    }
-                    parts[n-1]._assign(a, b);
-                    a = b + 1;
-                }
-            }
-
-            if (a != b){
-                parts[n]._assign(a, b);
-                ++n;
-            }
-            for (; n < N; ++n){
-                parts[n].clear();
-            }
-            return parts;
-        }
-        
-        template<size_t N>
-        std::array<string, N>& split_n(const string& sep, std::array<string, N>& parts) const {
-            assert(N > 0);
-
-            char* a = _str;
-            char* b = a;
-            size_t n = 0;
-            size_t seplen = sep.length();
-            while (b < _end){
-                b = std::search(a, _end, sep._str, sep._end);
-                if (b != _end){
-                    if (N == ++n){
-                        b = _end;
-                    }
-                    parts[n-1]._assign(a, b);
-                    b += seplen;
-                    a = b;
-                }
-            }
-
-            if (a != b){
-                parts[n]._assign(a, b);
-                ++n;
-            }
-            for (; n < N; ++n){
-                parts[n].clear();
-            }
-            return parts;
-        }
-
-        template<size_t N>
-        std::array<string, N> split_n(char sep) const {
-            std::array<string, N> parts;
-            return split_n(sep, parts);
-        }
-
-        template<size_t N>
-        std::array<string, N> split_n(const string& sep) const {
-            std::array<string, N> parts;
-            return split_n(sep, parts);
+            return split_kv(s, kv);
         }
 
         /* Gets the integer value represented by the string. */
@@ -437,46 +422,44 @@ namespace hy {
 
         /* Random access without checking. */
         const char& operator[](size_t i) const { return _str[i]; }
-        char& operator[](size_t i) { return _str[i]; }
 
         /* Substring operator. Returns substring[start : stop] */
         string operator()(int start = 0, int stop = INT_MAX) const {
             return substr(start, stop);
         }
 
-        static const size_t npos = (size_t)-1;
-
     private:        
-        char* _offset(int n) const {
+        const char* _offset(int n) const {
             if (n >= 0){
-                return (unsigned)n < length() ? _str + n : _end;
+                return _str + n < _end ? _str + n : _end;
             }
-            return (unsigned)-n < length() ? _end + n : _str;
+            return _end + n > _str ? _end + n : _str;
         }
 
-        void _assign(char* str, char* end){
+        void _assign(const char* str, const char* end){
             _str = str;
             _end = end;
         }
 
-        void _assign_checked(char* str, char* end){
-            if (end <= str){
-                _end = _str = _zeros();
-            }
-            else {
+        void _assign_checked(const char* str, const char* end){
+            if (end > str){
                 _str = str;
                 _end = end;
             }
+            else {
+                clear();
+            }
         }
 
-        /* Buffer for an empty string */
-        static char* _zeros() {
-            static int d = 0;
-            return reinterpret_cast<char*>(&d);
+        static void _check_separator(const string& s) {
+            if (s.empty()){
+                throw std::invalid_argument("separator string can't be empty");
+            }
         }
 
-        char* _str;
-        char* _end;
+        static const int _zero = 0;
+        const char* _str;
+        const char* _end;
     };
 
     inline bool operator== (const string& left, const string& right){

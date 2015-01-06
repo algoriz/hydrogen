@@ -38,13 +38,30 @@ void string_tests() {
     }
     END_TEST_CASE();
 
-    BEGIN_TEST_CASE("split");
+    BEGIN_TEST_CASE("split/split_kv");
     {
         auto h = string("GET / HTTP/1.1\r\nHost: google.com\r\nContent-Length: -1\r\n\r\n").split("\r\n");
         TEST_CHECK(h.size() == 4 && h[3].empty());
         TEST_CHECK(h[1].split_kv(':').first.trim() == "Host");
         TEST_CHECK(h[1].split_kv(':').second.trim() == "google.com");
         TEST_CHECK(h[2].split_kv(':').second.to_int() == -1);
+
+        auto csv = string("0,20,330,4440,55550,666660");
+        TEST_CHECK(csv.split(',').size() == 6);
+        TEST_CHECK(csv.split(',', 1).size() == 2);
+        TEST_CHECK(csv.split(',', 1)[1] == csv(2));
+        TEST_CHECK(csv.split(',', 4).size() == 5);
+        TEST_CHECK(csv.split(',', 4)[4] == csv(-12));
+        TEST_CHECK(csv.split(',', 5).size() == 6);
+        TEST_CHECK(csv.split(',', 5)[5] == csv(-6));
+
+        TEST_CHECK(csv.split("0,").size() == 6);
+        TEST_CHECK(csv.split("0,", 1).size() == 2);
+        TEST_CHECK(csv.split("0,", 1)[1] == csv(2));
+        TEST_CHECK(csv.split("0,", 4).size() == 5);
+        TEST_CHECK(csv.split("0,", 4)[4] == csv(-12));
+        TEST_CHECK(csv.split("0,", 5).size() == 6);
+        TEST_CHECK(csv.split("0,", 5)[5] == csv(-6));
     }
     END_TEST_CASE();
 
@@ -68,18 +85,18 @@ void string_tests() {
     }
     END_TEST_CASE();
     
-    BEGIN_TEST_CASE("make_lower/make_upper/starts_with/ends_with");
+    BEGIN_TEST_CASE("starts_with/ends_with");
     {
-        char str[] = "hEllO woRLd";
-        auto s = string(str);
-        TEST_CHECK(s.make_lower() == "hello world");
-        TEST_CHECK(s.make_upper() == "HELLO WORLD");
-        TEST_CHECK(s.starts_with("HELLO"));
-        TEST_CHECK(!s.starts_with("HELLO-"));
-        TEST_CHECK(s.ends_with("WORLD"));
-        TEST_CHECK(!s.ends_with("WORLD-"));
+        auto s = string("hello world!");
         TEST_CHECK(string().starts_with(""));
         TEST_CHECK(string().ends_with(""));
+        TEST_CHECK(s.starts_with(s) && s.ends_with(s));
+        TEST_CHECK(s.starts_with("hello"));
+        TEST_CHECK(s.ends_with("world!"));
+        TEST_CHECK(!s.starts_with("helo"));
+        TEST_CHECK(!s.starts_with("hello world!X"));
+        TEST_CHECK(!s.ends_with("world!X"));
+        TEST_CHECK(!s.ends_with("world"));
     }
     END_TEST_CASE();
 
@@ -112,28 +129,5 @@ void string_tests() {
     }
     END_TEST_CASE();
 
-    //BEGIN_TEST_CASE("string_builder");
-    //{
-    //    char buf[1024];
-    //    string_builder builder(buf, 1024);
-    //    TEST_CHECK(builder.append(10).to_string().to_int() == 10);
-    //    builder.clear();
-    //    TEST_CHECK(builder.append(-1).to_string().to_int() == -1);
-    //    builder.clear();
-    //    TEST_CHECK(builder.append(123456789).to_string().to_int() == 123456789);
-    //    builder.clear();
-    //    TEST_CHECK(builder.append(123456789123456).to_string().to_longlong() == 123456789123456);
-    //    builder.clear();
-    //    TEST_CHECK(builder.append_format("hello").to_string() == "hello");
-    //    TEST_CHECK(builder.append_format("").to_string() == "hello");
-    //    TEST_CHECK(builder.append("").to_string() == "hello");
-    //    TEST_CHECK(builder.append(" world").to_string() == "hello world");
-    //    TEST_CHECK(builder.append(' ').to_string() == "hello world ");
-    //    TEST_CHECK(builder.append(false).to_string() == "hello world false");
-    //    TEST_CHECK(builder.append(' ').to_string() == "hello world false ");
-    //    TEST_CHECK(builder.append(123456).to_string() == "hello world false 123456");
-    //    builder.clear();
-    //}
-    //END_TEST_CASE();
     END_TEST_PACKAGE();
 }
