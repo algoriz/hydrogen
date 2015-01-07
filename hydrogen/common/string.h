@@ -17,6 +17,9 @@ namespace hy {
      */
     class string {
     public:
+        typedef const char char_t;
+        typedef char_t* pointer_t;
+
         /* "Not a Position" indicator */
         static const size_t npos = (size_t)-1;
 
@@ -27,15 +30,15 @@ namespace hy {
             _end(reinterpret_cast<const char*>(&_zero)){}
 
         /* Wraps string str */
-        string(const char* str)
+        string(pointer_t str)
             : _str(str), _end(str + strlen(str)){}
 
         /* Wraps initial count characters of string str */
-        string(const char* str, size_t count)
+        string(pointer_t str, size_t count)
             : _str(str), _end(str + count){}
 
         /* Wraps characters [beg : end] */
-        string(const char* beg, const char* end)
+        string(pointer_t beg, pointer_t end)
             : _str(beg), _end(end) { assert(beg <= end); }
 
         /* Length of the string. */
@@ -94,15 +97,14 @@ namespace hy {
         /* Get the string buffer.
          * Note that the string buffer MAY NOT be null terminated.
          */
-        const char* buffer() const { return _str; }
+        pointer_t buffer() const { return _str; }
 
         /* Forward iterators */
-        const char* begin() const { return _str; }
-        const char* end() const { return _end; }
+        pointer_t begin() const { return _str; }
+        pointer_t end() const { return _end; }
 
-        /* Backward iterators */
-        const char* rbegin() const { return _end - 1; }
-        const char* rend() const { return _str - 1; }
+        char_t& front() const { return *_str; }
+        char_t& back() const { return *(_end - 1); }
 
         /* Get substring[start : stop]
          * Both start and stop can be negative. A negative value indicates that
@@ -118,8 +120,25 @@ namespace hy {
          * If ch is not found in string, npos is returned.
          */
         size_t find(char ch) const {
-            auto p = std::find(_str, _end, ch);
-            return p == _end ? npos : p - _str;
+            for (auto p = _str; p != _end; ++p){
+                if (*p == ch){
+                    return p - _str;
+                }
+            }
+            return npos;
+        }
+        
+        /* Find the position of the last occurrence of ch in the string.
+         * If ch is not found in string, npos is returned.
+         */
+        size_t rfind(char ch) const {
+            auto rend = _str - 1;
+            for (auto p = _end - 1; p != rend; --p){
+                if (*p == ch){
+                    return p - _str;
+                }
+            }
+            return npos;
         }
 
         /* Search string for the first occurrence of str.
@@ -128,6 +147,10 @@ namespace hy {
         size_t search(const string& str) const {
             auto p = std::search(_str, _end, str._str, str._end);
             return p == _end ? npos : p - _str;
+        }
+
+        bool contains(char ch) const {
+            return find(ch) != npos;
         }
 
         bool contains(const string& str) const {
@@ -198,8 +221,8 @@ namespace hy {
         }
 
         /* Copy initial `count` characters to `dst` and returns `dst`.
-         * If `count` is less than the length of the string, a null character is
-         * not automatically appended to `dst`.
+         * If `count` is less than or equal to the length of the string, a null
+         * character is not automatically appended to `dst`.
          * If `count` is greater than the length of the string, `dst` is padded
          * with null characters up to length `count`.
          */
@@ -396,8 +419,10 @@ namespace hy {
                 return atoi(_str);
             }
 
-            char d[16];
-            return atoi(ncopy(d, 16));
+            char d[36];
+            d[34] = d[35] = '\0';
+            size_t len = length() > 34 ? 34 : length();
+            return atoi(ncopy(d, len));
         }
 
         /* Gets the double value represented by the string. */
@@ -406,8 +431,10 @@ namespace hy {
                 return atof(_str);
             }
 
-            char d[16];
-            return atof(ncopy(d, 16));
+            char d[36];
+            d[34] = d[35] = '\0';
+            size_t len = length() > 34 ? 34 : length();
+            return atof(ncopy(d, len));
         }
 
         /* Gets the long long value represented by the string. */
@@ -416,8 +443,10 @@ namespace hy {
                 return atoll(_str);
             }
 
-            char d[64];
-            return atoll(ncopy(d, 64));
+            char d[36];
+            d[34] = d[35] = '\0';
+            size_t len = length() > 34 ? 34 : length();
+            return atoll(ncopy(d, len));
         }
 
         /* Random access without checking. */
@@ -429,19 +458,19 @@ namespace hy {
         }
 
     private:        
-        const char* _offset(int n) const {
+        pointer_t _offset(int n) const {
             if (n >= 0){
                 return _str + n < _end ? _str + n : _end;
             }
             return _end + n > _str ? _end + n : _str;
         }
 
-        void _assign(const char* str, const char* end){
+        void _assign(pointer_t str, pointer_t end){
             _str = str;
             _end = end;
         }
 
-        void _assign_checked(const char* str, const char* end){
+        void _assign_checked(pointer_t str, pointer_t end){
             if (end > str){
                 _str = str;
                 _end = end;
@@ -458,8 +487,8 @@ namespace hy {
         }
 
         static const int _zero = 0;
-        const char* _str;
-        const char* _end;
+        pointer_t _str;
+        pointer_t _end;
     };
 
     inline bool operator== (const string& left, const string& right){

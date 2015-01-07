@@ -129,5 +129,20 @@ void string_tests() {
     }
     END_TEST_CASE();
 
+    BEGIN_TEST_CASE("find/rfind/search");
+    {
+        string s1("ABCD:ABCD*ABCDABCD");
+        TEST_CHECK(s1.find(':') == s1.rfind(':'));
+        TEST_CHECK(s1.find(':') + 5 == s1.rfind('*'));
+        TEST_CHECK(s1.find('Z') == string::npos);
+        TEST_CHECK(s1.find(s1.front()) == 0);
+        TEST_CHECK(s1.rfind(s1.back()) == s1.length() - 1);
+
+        TEST_CHECK(s1.search(s1) == 0);
+        TEST_CHECK(s1.search(s1.substr(1)) == 1);
+        TEST_CHECK(s1.search(s1.substr(2)) == 2);
+        TEST_CHECK(s1.search(s1.substr(4)) == 4);
+    }
+    END_TEST_CASE();
     END_TEST_PACKAGE();
 }
