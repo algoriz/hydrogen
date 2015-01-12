@@ -17,8 +17,8 @@ namespace hy {
      */
     class string {
     public:
-        typedef const char char_t;
-        typedef char_t* pointer_t;
+        typedef const char& reference;
+        typedef const char* pointer;
 
         /* "Not a Position" indicator */
         static const size_t npos = (size_t)-1;
@@ -30,15 +30,15 @@ namespace hy {
             _end(reinterpret_cast<const char*>(&_zero)){}
 
         /* Wraps string str */
-        string(pointer_t str)
+        string(pointer str)
             : _str(str), _end(str + strlen(str)){}
 
         /* Wraps initial count characters of string str */
-        string(pointer_t str, size_t count)
+        string(pointer str, size_t count)
             : _str(str), _end(str + count){}
 
         /* Wraps characters [beg : end] */
-        string(pointer_t beg, pointer_t end)
+        string(pointer beg, pointer end)
             : _str(beg), _end(end) { assert(beg <= end); }
 
         /* Length of the string. */
@@ -97,14 +97,14 @@ namespace hy {
         /* Get the string buffer.
          * Note that the string buffer MAY NOT be null terminated.
          */
-        pointer_t buffer() const { return _str; }
+        pointer buffer() const { return _str; }
 
         /* Forward iterators */
-        pointer_t begin() const { return _str; }
-        pointer_t end() const { return _end; }
+        pointer begin() const { return _str; }
+        pointer end() const { return _end; }
 
-        char_t& front() const { return *_str; }
-        char_t& back() const { return *(_end - 1); }
+        reference& front() const { return *_str; }
+        reference& back() const { return *(_end - 1); }
 
         /* Get substring[start : stop]
          * Both start and stop can be negative. A negative value indicates that
@@ -458,19 +458,19 @@ namespace hy {
         }
 
     private:        
-        pointer_t _offset(int n) const {
+        pointer _offset(int n) const {
             if (n >= 0){
                 return _str + n < _end ? _str + n : _end;
             }
             return _end + n > _str ? _end + n : _str;
         }
 
-        void _assign(pointer_t str, pointer_t end){
+        void _assign(pointer str, pointer end){
             _str = str;
             _end = end;
         }
 
-        void _assign_checked(pointer_t str, pointer_t end){
+        void _assign_checked(pointer str, pointer end){
             if (end > str){
                 _str = str;
                 _end = end;
@@ -487,8 +487,8 @@ namespace hy {
         }
 
         static const int _zero = 0;
-        pointer_t _str;
-        pointer_t _end;
+        pointer _str;
+        pointer _end;
     };
 
     inline bool operator== (const string& left, const string& right){
